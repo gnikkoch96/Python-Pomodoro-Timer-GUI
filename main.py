@@ -1,5 +1,5 @@
 import dearpygui.dearpygui as dpg
-from pomodoro_settings import pomodoro_settings
+from pomodoro_settings import PomodoroSettings
 
 def create_windows():
     dpg.setup_viewport()
@@ -7,11 +7,11 @@ def create_windows():
     dpg.set_viewport_height(500)
     dpg.set_viewport_width(800)
     dpg.set_global_font_scale(1.25)
-
-    pSettings = pomodoro_settings(dpg)
-
+    PomodoroSettings(dpg)
     dpg.start_dearpygui()
 
 if __name__ == '__main__':
     create_windows()
+    # dpg.show_documentation()
+
 

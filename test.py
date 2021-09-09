@@ -22,10 +22,10 @@ def input_test():
     dpg.stop_dearpygui()
 
     with dpg.window(label="Input Testing", width=300) as container_one:
-        inputTextOne = dpg.add_input_text(label="Input One")
-        inputTextTwo = dpg.add_input_text(label="Input Two", default_value="Enter Password")
-        slider_float1 = dpg.add_slider_float(label="Slider One")
-        slider_float2 = dpg.add_slider_float(label="Slider Two", default_value=30)
+        dpg.add_input_text(label="Input One")
+        dpg.add_input_text(label="Input Two", default_value="Enter Password")
+        dpg.add_slider_float(label="Slider One")
+        dpg.add_slider_float(label="Slider Two", default_value=30)
 
     dpg.setup_viewport()
     dpg.set_viewport_height(100)

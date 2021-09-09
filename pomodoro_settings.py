@@ -1,14 +1,15 @@
-from pomodoro_timer import pomodoro_timer
+from pomodoro_timer import PomodoroTimer
 
 
-class pomodoro_settings():
+class PomodoroSettings:
     def __init__(self, dpg):
         self.dpg = dpg
         self.list_time = self.create_time_list()
 
         with dpg.window(label="Pomodoro Timer Settings",
+                        id="Settings GUI",
                         height=self.dpg.get_viewport_height(),
-                        width=self.dpg.get_viewport_width()):
+                        width=self.dpg.get_viewport_width()) :
             self.comboFocusTime = dpg.add_combo(label="Focus Time",
                                                 id="Focus Time Combo",
                                                 items=self.list_time,
@@ -25,10 +26,9 @@ class pomodoro_settings():
                                               id="Start",
                                               callback=self.start_button_callback)
 
-            # dpg.configure_item(inputFocusTimeInt, enabled=False)
-
     def start_button_callback(self):
-        pTimer = pomodoro_timer(self.dpg, self)
+        PomodoroTimer(self.dpg, self)  # starts the timer
+        self.dpg.hide_item("Settings GUI")
 
     def get_focus_time(self):
         return self.dpg.get_value("Focus Time Combo")

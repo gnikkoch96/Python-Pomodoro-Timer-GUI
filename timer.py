@@ -10,6 +10,7 @@ class Timer:
         self.mins = int(mins)
         self.sec = 0
         self.continue_timer = True  # bool used to control the timer
+        self.timer_event = threading.Event()
         self.timer_thread = threading.Thread(target=self.start_timer, daemon=True)
         self.timer_thread.start()  # starts the timer thread immediately
 
@@ -17,9 +18,6 @@ class Timer:
         # continue the timer until user stops, pauses, or restarts the timer
         # and when the min counter >= 0 and sec is greater than 0
 
-        if not self.continue_timer:
-            print("hello")
-            self.continue_timer = True
 
         while self.continue_timer and (self.mins >= 0 and self.sec >= 0):
             if self.sec <= 0:

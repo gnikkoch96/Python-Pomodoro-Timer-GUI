@@ -16,17 +16,15 @@ class PomodoroTimer:
 
         self.dpg.set_primary_window(pomodoro_window, value=True)
 
-        # in the main thread
-        # self.update_gui()
-
         # creates a new thread
         self.pomodoro_timer_thread = threading.Thread(target=self.update_gui, daemon=True)
         self.pomodoro_timer_thread.start()
 
     def update_gui(self):  # this is a thread function used to update the gui with the timer min and sec values
-        while self.timer.get_min_value() >= 0 and self.timer.get_sec_value() >= 0:
+        while self.timer.continue_timer and self.timer.get_min_value() >= 0 and self.timer.get_sec_value() >= 0:
             self.dpg.set_value("Minute", self.timer.get_min_value())
             self.dpg.set_value("Second", self.timer.get_sec_value())
+
 
     def create_displays(self):
         display_min_time = self.dpg.add_input_text(label="min", id="Minute", default_value=self.timer.get_min_value())
@@ -35,7 +33,7 @@ class PomodoroTimer:
         display_sec_time = self.dpg.add_input_text(label="sec", id="Second", default_value=self.timer.get_sec_value())
         self.dpg.configure_item(display_sec_time, enabled=False)
 
-        display_pomodoro_counter = self.dpg.add_input_text(label="# of Pomodoros", default_value=0) # later on default value will be read from a file
+        display_pomodoro_counter = self.dpg.add_input_text(label="# of Pomodoros", id="Pomdodoro Counter", default_value=0) # later on default value will be read from a file
         self.dpg.configure_item(display_pomodoro_counter, enabled=False)
 
     def create_buttons(self):

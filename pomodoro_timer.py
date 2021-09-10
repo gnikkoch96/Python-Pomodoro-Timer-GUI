@@ -21,7 +21,7 @@ class PomodoroTimer:
         self.pomodoro_timer_thread.start()
 
     def update_gui(self):  # this is a thread function used to update the gui with the timer min and sec values
-        while self.timer.continue_timer and self.timer.get_min_value() >= 0 and self.timer.get_sec_value() >= 0:
+        while self.timer.get_min_value() >= 0 and self.timer.get_sec_value() >= 0:
             self.dpg.set_value("Minute", self.timer.get_min_value())
             self.dpg.set_value("Second", self.timer.get_sec_value())
 
@@ -58,7 +58,7 @@ class PomodoroTimer:
         self.timer.pause_timer()
 
     def resume_callback(self):
-        self.timer.start_timer()
+        self.timer.resume_timer()
 
     def stop_callback(self):
         self.timer.stop_timer()

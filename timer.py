@@ -17,16 +17,19 @@ class Timer:
     def start_timer(self):
         # continue the timer until user stops, pauses, or restarts the timer
         # and when the min counter >= 0 and sec is greater than 0
-
-
-        while self.continue_timer and (self.mins >= 0 and self.sec >= 0):
-            if self.sec <= 0:
-                self.mins -= 1
-                self.sec = 60
+        while self.mins >= 0 and self.sec >= 0:
+            if not self.continue_timer:
+                self.timer_event.wait()
+                self.timer_event.clear()
             else:
-                self.sec -= 1
-                time.sleep(1)
-            print(self.mins, " min\n", self.sec, " sec")
+                if self.sec <= 0:
+                    if self.mins - 1 >= 0:
+                        self.mins -= 1
+                        self.sec = 60
+                else:
+                    self.sec -= 1
+                    time.sleep(1)
+                # print(self.mins, " min\n", self.sec, " sec")
 
     def restart_timer(self):
         # 1. resets the timer back to focus time
@@ -40,6 +43,10 @@ class Timer:
     def pause_timer(self):
         # 1. pauses the timer
         self.continue_timer = False
+
+    def resume_timer(self):
+        self.continue_timer = True
+        self.timer_event.set() # triggers the timer to continue again
 
     def get_min_value(self):
         return self.mins

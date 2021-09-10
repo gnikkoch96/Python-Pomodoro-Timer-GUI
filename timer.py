@@ -42,7 +42,6 @@ class Timer:
     def restart_timer(self):
         # ends the timer thread
         # 1. resets the timer (in the Timer Class)
-        # 2. resets the counter for the pomodoro cycle (in the GUI Class)
         self.timer_restart = True
         print("Timer Thread ended")
 

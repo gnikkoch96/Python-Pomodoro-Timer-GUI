@@ -5,26 +5,34 @@ import time
 # Timer class used to handle the timer functionalities
 class Timer:
     # initialize the timer with mins
-    def __init__(self, mins):
+    def __init__(self, focus_mins, small_break_mins, long_break_mins):
         # initialize values
-        self.mins = int(mins)
+        self.focus_mins = focus_mins
+        self.small_break_mins = small_break_mins
+        self.long_break_mins = long_break_mins
         self.sec = 0
-        self.continue_timer = True  # bool used to control the timer
+
+        # boolean logic to control timer thread
+        self.timer_pause = False
+        self.timer_stop = False
+        self.timer_restart = False
+
+        # threading related
         self.timer_event = threading.Event()
         self.timer_thread = threading.Thread(target=self.start_timer, daemon=True)
-        self.timer_thread.start()  # starts the timer thread immediately
+        self.timer_thread.start()
 
     def start_timer(self):
         # continue the timer until user stops, pauses, or restarts the timer
-        # and when the min counter >= 0 and sec is greater than 0
-        while self.mins >= 0 and self.sec >= 0:
-            if not self.continue_timer:
+        # and when the timer has not finished
+        while not (self.timer_stop or self.timer_restart) and (self.focus_mins >= 0 and self.sec >= 0):
+            if self.timer_pause:
                 self.timer_event.wait()
                 self.timer_event.clear()
             else:
                 if self.sec <= 0:
-                    if self.mins - 1 >= 0:
-                        self.mins -= 1
+                    if self.focus_mins - 1 >= 0:
+                        self.focus_mins -= 1
                         self.sec = 60
                 else:
                     self.sec -= 1
@@ -32,24 +40,31 @@ class Timer:
                 # print(self.mins, " min\n", self.sec, " sec")
 
     def restart_timer(self):
-        # 1. resets the timer back to focus time
-        # 2. resets the counter for the pomodoro cycle
-        self.continue_timer = False
+        # ends the timer thread
+        # 1. resets the timer (in the Timer Class)
+        # 2. resets the counter for the pomodoro cycle (in the GUI Class)
+        self.timer_restart = True
+        print("Timer Thread ended")
 
     def stop_timer(self):
-        # 1. resets the timer of focus
-        self.continue_timer = False
+        # ends the timer thread
+        self.timer_stop = True
+        print("Timer Thread ended")
 
     def pause_timer(self):
+        # pauses the timer thread
         # 1. pauses the timer
-        self.continue_timer = False
+        self.timer_pause = True
+        print("Timer Thread paused")
 
     def resume_timer(self):
-        self.continue_timer = True
-        self.timer_event.set() # triggers the timer to continue again
+        # continues the timer thread (if pause was initiated)
+        self.timer_pause = False
+        self.timer_event.set()  # triggers the timer to continue again
+        print("Timer Thread continues")
 
     def get_min_value(self):
-        return self.mins
+        return self.focus_mins
 
     def get_sec_value(self):
         return self.sec

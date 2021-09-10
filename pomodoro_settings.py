@@ -31,13 +31,13 @@ class PomodoroSettings:
         self.dpg.hide_item("Settings GUI")
 
     def get_focus_time(self):
-        return self.dpg.get_value("Focus Time Combo")
+        return int(self.dpg.get_value("Focus Time Combo"))
 
     def get_small_break(self):
-        return self.dpg.get_value("Small Break Combo")
+        return int(self.dpg.get_value("Small Break Combo"))
 
     def get_long_break(self):
-        return self.dpg.get_value("Long Break Combo")
+        return int(self.dpg.get_value("Long Break Combo"))
 
     def create_time_list(self):
         time_list = []

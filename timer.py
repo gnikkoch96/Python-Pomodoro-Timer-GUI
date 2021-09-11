@@ -10,12 +10,16 @@ class Timer:
         self.focus_mins = focus_mins
         self.small_break_mins = small_break_mins
         self.long_break_mins = long_break_mins
+        self.mins = self.focus_mins
         self.sec = 0
 
         # boolean logic to control timer thread
         self.timer_pause = False
         self.timer_stop = False
         self.timer_restart = False
+        self.isFocus = True
+        self.isOnSmallBreak = False # it is a small break if it isn't a long break
+        self.isOnLongBreak = False # it is a long break if the # of pomodoros % 4 == 0
 
         # threading related
         self.timer_event = threading.Event()
@@ -23,27 +27,41 @@ class Timer:
         self.timer_thread.start()
 
     def start_timer(self):
+        print("Timer Thread Started")
+
         # continue the timer until user stops, pauses, or restarts the timer
         # and when the timer has not finished
-        while not (self.timer_stop or self.timer_restart) and (self.focus_mins >= 0 and self.sec >= 0):
+        while not self.timer_stop and (self.focus_mins >= 0 and self.sec >= 0):
             if self.timer_pause:
                 self.timer_event.wait()
                 self.timer_event.clear()
             else:
-                if self.sec <= 0:
-                    if self.focus_mins - 1 >= 0:
-                        self.focus_mins -= 1
-                        self.sec = 60
+                if self.timer_restart:
+                    # checks to see which timer to restart to
+                    if self.isFocus:
+                        self.mins = self.focus_mins
+                    elif self.isOnLongBreak:
+                        self.mins = self.long_break_mins
+                    else:
+                        self.mins = self.small_break_mins
+
+                    self.sec = 0
+                    self.timer_restart = False
                 else:
-                    self.sec -= 1
-                    time.sleep(1)
-                # print(self.mins, " min\n", self.sec, " sec")
+                    if self.sec <= 0:
+                        if self.mins - 1 >= 0:
+                            self.mins -= 1
+                            self.sec = 60
+                    else:
+                        self.sec -= 1
+                        time.sleep(1)
+                print(self.mins, " min\n", self.sec, " sec")
 
     def restart_timer(self):
-        # ends the timer thread
         # 1. resets the timer (in the Timer Class)
+        # 2. resets the counter for the pomodoro cycle (in the GUI Class)
         self.timer_restart = True
-        print("Timer Thread ended")
+        print("Timer Thread continues")
 
     def stop_timer(self):
         # ends the timer thread
@@ -63,7 +81,7 @@ class Timer:
         print("Timer Thread continues")
 
     def get_min_value(self):
-        return self.focus_mins
+        return self.mins
 
     def get_sec_value(self):
         return self.sec

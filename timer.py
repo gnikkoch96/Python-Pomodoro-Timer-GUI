@@ -27,11 +27,11 @@ class Timer:
         self.timer_thread.start()
 
     def start_timer(self):
-        print("Timer Thread Started")
+        print("[State: Start] - timer thread starts")
 
         # continue the timer until user stops, pauses, or restarts the timer
         # and when the timer has not finished
-        while not self.timer_stop and (self.focus_mins >= 0 and self.sec >= 0):
+        while not self.timer_stop and (self.mins >= 0 and self.sec >= 0):
             if self.timer_pause:
                 self.timer_event.wait()
                 self.timer_event.clear()
@@ -55,30 +55,36 @@ class Timer:
                     else:
                         self.sec -= 1
                         time.sleep(1)
+
+                # todo: breaking from the program is not good practice, so think of another solution
+                if self.mins <= 0 and self.sec <= 0:
+                    break
+
                 print(self.mins, " min\n", self.sec, " sec")
+        print("[State: Finished] timer thread ends")
 
     def restart_timer(self):
         # 1. resets the timer (in the Timer Class)
-        # 2. resets the counter for the pomodoro cycle (in the GUI Class)
         self.timer_restart = True
-        print("Timer Thread continues")
+        # 2. resets the counter for the pomodoro cycle (in the GUI Class)
+        print("[State: Restart] - timer thread continues")
 
     def stop_timer(self):
         # ends the timer thread
         self.timer_stop = True
-        print("Timer Thread ended")
+        print("[State: Stop] - timer thread ends")
 
     def pause_timer(self):
         # pauses the timer thread
         # 1. pauses the timer
         self.timer_pause = True
-        print("Timer Thread paused")
+        print("[State: Pause] - timer thread paused")
 
     def resume_timer(self):
         # continues the timer thread (if pause was initiated)
         self.timer_pause = False
         self.timer_event.set()  # triggers the timer to continue again
-        print("Timer Thread continues")
+        print("[State: Resume] - timer thread resumes")
 
     def get_min_value(self):
         return self.mins

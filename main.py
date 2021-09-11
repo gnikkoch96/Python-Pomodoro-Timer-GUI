@@ -12,6 +12,7 @@ def create_windows():
 
 if __name__ == '__main__':
     create_windows()
+    print("Main thread ends")
     # dpg.show_documentation()
 
 

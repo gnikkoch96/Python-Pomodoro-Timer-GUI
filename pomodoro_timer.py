@@ -15,7 +15,7 @@ class PomodoroTimer:
         self.global_pomodoro_counter = 0  # n: later I want to read from a file to see how many pomodoros the user has done for the day
 
         # Window
-        with dpg.window(label="Pomdoro Timer",
+        with self.dpg.window(label="Pomdoro Timer",
                         height=self.dpg.get_viewport_height(),
                         width=self.dpg.get_viewport_width()) as self.pomodoro_window:
             self.create_displays()
@@ -28,33 +28,31 @@ class PomodoroTimer:
         self.pomodoro_timer_thread.start()
 
     def update_gui(self):  # this is a thread function used to update the gui with the timer min and sec values
-        print("Pomdoro Timer GUI Thread Started")
+        print("---Update Pomodoro Timer GUI Thread Started---")
         while not self.timer.timer_stop and (self.timer.get_min_value() >= 0 and self.timer.get_sec_value() >= 0):
             self.dpg.set_value("Minute", self.timer.get_min_value())
             self.dpg.set_value("Second", self.timer.get_sec_value())
 
-            # n: currently used for testing b/c breaking from a program is never good practice
+            # todo: currently used for testing b/c breaking from a program is never good practice
             if self.timer.get_min_value() <= 0 and self.timer.get_sec_value() <= 0:
                 break
 
         # only add to counter if the timer finishes (not when the user presses stop or restart)
-        if self.timer.isFocus and self.timer.get_min_value() <= 0 and self.timer.get_sec_value() <= 0:
+        if self.timer.get_min_value() <= 0 and self.timer.get_sec_value() <= 0:
             pomodoro_counter = int(self.dpg.get_value("PomodoroCounter")) + 1
             self.local_pomodoro_counter = pomodoro_counter
-            if self.local_pomodoro_counter == 4:
-                self.timer.isOnLongBreak = True
-                self.timer.isFocus = False
-                self.local_pomodoro_counter = 0
-            else:
-                self.timer.isOnSmallBreak = True
-                self.timer.isFocus = False
+            self.global_pomodoro_counter = pomodoro_counter
             self.dpg.set_value("PomodoroCounter", str(pomodoro_counter))
-        else:  # either on small break or long break
-            self.timer.isFocus = True
-            self.timer.isOnSmallBreak = False
-            self.timer.isOnLongBreak = False
 
-        print("Pomodoro Timer GUI Thread Ended")
+            # create a new window for the finished session
+            with self.dpg.window(label="Pomodoro Timer Finished!",
+                                 id="FinishedWindow",
+                                 height=self.dpg.get_viewport_height() / 2,
+                                 width=self.dpg.get_viewport_width() / 2) as finished_session_window:
+                self.create_buttons_for_finished_session()
+                # todo: implement playing of sound here
+
+        print("---Update Pomodoro Timer GUI Thread Ended---")
 
     def create_displays(self):
         display_min_time = self.dpg.add_input_text(label="min", id="Minute", default_value=self.timer.get_min_value())
@@ -77,6 +75,58 @@ class PomodoroTimer:
         self.dpg.add_same_line()
         buttonRestart = self.dpg.add_button(label="Restart", id="Restart", callback=self.restart_callback)
 
+    def create_buttons_for_finished_session(self):
+        buttonFocus = self.dpg.add_button(label="Focus Time", id="Focus", callback=self.focus_callback)
+        self.dpg.add_same_line()
+        buttonSmallBreak = self.dpg.add_button(label="Small Break", id="SmallBreak", callback=self.smallbreak_callback)
+        if self.local_pomodoro_counter == 4:
+            self.dpg.add_same_line()
+            buttonLongBreak = self.dpg.add_button(label="Long Break", id="LongBreak", callback=self.longbreak_callback)
+
+    def focus_callback(self):
+        # creates a new timer thread
+        self.timer = Timer(self.settings.get_focus_time(),
+                           self.settings.get_small_break(),
+                           self.settings.get_long_break())
+
+        # creates a new thread to update the gui
+        self.pomodoro_timer_thread = threading.Thread(target=self.update_gui, daemon=True)
+        self.pomodoro_timer_thread.start()
+
+        self.dpg.delete_item("FinishedWindow")
+        self.timer.isOnLongBreak = False
+        self.timer.isFocus = True
+        self.timer.isOnSmallBreak = False
+
+    def smallbreak_callback(self):
+        self.timer = Timer(self.settings.get_focus_time(),
+                           self.settings.get_small_break(),
+                           self.settings.get_long_break())
+
+        self.pomodoro_timer_thread = threading.Thread(target=self.update_gui, daemon=True)
+        self.pomodoro_timer_thread.start()
+
+        self.dpg.delete_item("FinishedWindow")
+        self.timer.isOnLongBreak = False
+        self.timer.isFocus = False
+        self.timer.isOnSmallBreak = True
+
+    def longbreak_callback(self):
+        self.timer = Timer(self.settings.get_focus_time(),
+                           self.settings.get_small_break(),
+                           self.settings.get_long_break())
+
+        self.pomodoro_timer_thread = threading.Thread(target=self.update_gui, daemon=True)
+        self.pomodoro_timer_thread.start()
+
+        self.dpg.delete_item("FinishedWindow")
+
+        # I'll let the user choose when to take a long break only after they have at least 4 focus sessions
+        self.local_pomodoro_counter = 0
+        self.timer.isOnLongBreak = True
+        self.timer.isFocus = False
+        self.timer.isOnSmallBreak = False
+
     def pause_callback(self):
         self.timer.pause_timer()
 
@@ -93,6 +143,8 @@ class PomodoroTimer:
 
         # 3. show the settings gui again
         self.dpg.show_item("Settings GUI")
+        self.dpg.set_primary_window("Settings GUI", value=True)
+
 
     def restart_callback(self):
         # 1. resets the timer (in the Timer Class)

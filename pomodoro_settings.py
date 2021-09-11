@@ -9,7 +9,7 @@ class PomodoroSettings:
         with dpg.window(label="Pomodoro Timer Settings",
                         id="Settings GUI",
                         height=self.dpg.get_viewport_height(),
-                        width=self.dpg.get_viewport_width()) :
+                        width=self.dpg.get_viewport_width()) as pomodoro_settings_window:
             self.comboFocusTime = dpg.add_combo(label="Focus Time",
                                                 id="Focus Time Combo",
                                                 items=self.list_time,
@@ -25,10 +25,12 @@ class PomodoroSettings:
             self.buttonStart = dpg.add_button(label="Start Pomodoro!",
                                               id="Start",
                                               callback=self.start_button_callback)
+            self.dpg.set_primary_window(pomodoro_settings_window, value=True)
 
     def start_button_callback(self):
         PomodoroTimer(self.dpg, self)  # starts the timer
         self.dpg.hide_item("Settings GUI")
+
 
     def get_focus_time(self):
         return int(self.dpg.get_value("Focus Time Combo"))
@@ -41,6 +43,11 @@ class PomodoroSettings:
 
     def create_time_list(self):
         time_list = []
-        for i in range(1, 61):  # creates a list between 1 - 60 mins to choose for the time
+        # for i in range(1, 61):  # creates a list between 1 - 60 mins to choose for the time
+        #     time_list.append(i)
+
+        # debug purposes
+        for i in range(0, 2):
             time_list.append(i)
+
         return time_list

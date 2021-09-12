@@ -5,10 +5,12 @@ class PomodoroSettings:
         self.dpg = dpg
         self.list_time = self.create_time_list()
 
-        with dpg.window(label="Pomodoro Timer Settings",
+        with self.dpg.window(label="Pomodoro Timer Settings",
                         id="Settings GUI",
                         height=self.dpg.get_viewport_height(),
                         width=self.dpg.get_viewport_width()) as pomodoro_settings_window:
+
+            self.add_and_load_image('resources/images/tomato-banner.png', pomodoro_settings_window)
             self.comboFocusTime = dpg.add_combo(label="Focus Time",
                                                 id="Focus Time Combo",
                                                 items=self.list_time,
@@ -26,10 +28,21 @@ class PomodoroSettings:
                                               callback=self.start_button_callback)
             self.dpg.set_primary_window(pomodoro_settings_window, value=True)
 
+    # grabbed from the documents
+    def add_and_load_image(self, image_path, parent=None):
+        width, height, channels, data = self.dpg.load_image(image_path)
+
+        with self.dpg.texture_registry() as reg_id:
+            texture_id = self.dpg.add_static_texture(width, height, data, parent=reg_id)
+
+        if parent is None:
+            return self.dpg.add_image(texture_id)
+        else:
+            return self.dpg.add_image(texture_id, parent=parent)
+
     def start_button_callback(self):
         PomodoroTimer(self.dpg, self)  # starts the timer
         self.dpg.hide_item("Settings GUI")
-
 
     def get_focus_time(self):
         return int(self.dpg.get_value("Focus Time Combo"))

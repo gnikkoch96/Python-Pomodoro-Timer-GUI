@@ -48,8 +48,8 @@ class PomodoroTimer:
                                  height=self.dpg.get_viewport_height() / 2,
                                  width=self.dpg.get_viewport_width() / 2) as finished_session_window:
                 self.create_buttons_for_finished_session()
-                playsound('sounds/chime.wav')
-                
+                playsound('resources/sounds/chime.wav')
+            self.dpg.set_item_theme(finished_session_window, "Red")
             self.event.wait()  # waits for the user to press one of the buttons
             self.event.clear()
             self.dpg.delete_item(finished_session_window)
@@ -87,13 +87,14 @@ class PomodoroTimer:
         self.dpg.configure_item(display_pomodoro_counter, enabled=False)
 
     def create_buttons(self):
-        buttonPause = self.dpg.add_button(label="Pause", id="Pause", callback=self.pause_callback)
-        self.dpg.add_same_line()
-        buttonResume = self.dpg.add_button(label="Resume", id="Resume", callback=self.resume_callback)
-        self.dpg.add_same_line()
         buttonStop = self.dpg.add_button(label="Stop", id="Stop", callback=self.stop_callback)
         self.dpg.add_same_line()
         buttonRestart = self.dpg.add_button(label="Restart", id="Restart", callback=self.restart_callback)
+        self.dpg.add_same_line()
+        buttonPause = self.dpg.add_button(label="Pause", id="Pause", callback=self.pause_callback)
+        self.dpg.add_same_line()
+        buttonResume = self.dpg.add_button(label="Resume", id="Resume", callback=self.resume_callback)
+        self.dpg.hide_item(buttonResume)
 
     def create_buttons_for_finished_session(self):
         buttonFocus = self.dpg.add_button(label="Focus Time", id="Focus", callback=self.focus_callback)
@@ -127,9 +128,13 @@ class PomodoroTimer:
         self.timer.isOnSmallBreak = False
 
     def pause_callback(self):
+        self.dpg.hide_item("Pause")
+        self.dpg.show_item("Resume")
         self.timer.pause_timer()
 
     def resume_callback(self):
+        self.dpg.show_item("Pause")
+        self.dpg.hide_item("Resume")
         self.timer.resume_timer()
 
     def stop_callback(self):

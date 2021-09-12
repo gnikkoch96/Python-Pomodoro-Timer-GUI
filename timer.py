@@ -32,6 +32,9 @@ class Timer:
         # continue the timer until user stops, pauses, or restarts the timer
         # and when the timer has not finished
         while not self.timer_stop and (self.mins >= 0 and self.sec >= 0):
+            if self.mins <= 0 and self.sec <= 0:
+                break
+
             if self.timer_pause:
                 self.timer_event.wait()
                 self.timer_event.clear()
@@ -55,10 +58,6 @@ class Timer:
                     else:
                         self.sec -= 1
                         time.sleep(1)
-
-                # todo: breaking from the program is not good practice, so think of another solution
-                if self.mins <= 0 and self.sec <= 0:
-                    break
 
                 print(self.mins, " min\n", self.sec, " sec")
         print("[State: Finished] timer thread ends")

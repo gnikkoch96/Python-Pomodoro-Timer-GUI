@@ -30,12 +30,13 @@ class PomodoroTimer:
     def update_gui(self):  # this is a thread function used to update the gui with the timer min and sec values
         print("---Update Pomodoro Timer GUI Thread Started---")
         while not self.timer.timer_stop and (self.timer.get_min_value() >= 0 and self.timer.get_sec_value() >= 0):
+            if self.timer.get_min_value() <= 0 and self.timer.get_sec_value() <= 0:
+                break
+
             self.dpg.set_value("Minute", self.timer.get_min_value())
             self.dpg.set_value("Second", self.timer.get_sec_value())
 
-            # todo: currently used for testing b/c breaking from a program is never good practice
-            if self.timer.get_min_value() <= 0 and self.timer.get_sec_value() <= 0:
-                break
+
 
         # only add to counter if the timer finishes (not when the user presses stop or restart)
         if self.timer.get_min_value() <= 0 and self.timer.get_sec_value() <= 0:
@@ -79,7 +80,7 @@ class PomodoroTimer:
         buttonFocus = self.dpg.add_button(label="Focus Time", id="Focus", callback=self.focus_callback)
         self.dpg.add_same_line()
         buttonSmallBreak = self.dpg.add_button(label="Small Break", id="SmallBreak", callback=self.smallbreak_callback)
-        if self.local_pomodoro_counter == 4:
+        if self.local_pomodoro_counter >= 4:
             self.dpg.add_same_line()
             buttonLongBreak = self.dpg.add_button(label="Long Break", id="LongBreak", callback=self.longbreak_callback)
 

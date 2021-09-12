@@ -1,6 +1,5 @@
 from pomodoro_timer import PomodoroTimer
 
-
 class PomodoroSettings:
     def __init__(self, dpg):
         self.dpg = dpg

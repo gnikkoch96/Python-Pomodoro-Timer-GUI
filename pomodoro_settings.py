@@ -1,32 +1,82 @@
 from pomodoro_timer import PomodoroTimer
 
+
 class PomodoroSettings:
+    # static variables
+    SETTINGS_WINDOW_TAG = "Settings GUI"
+    CONFIGURATION_COMBO_WIDTH = 400
+    CONFIGURATION_ITEM_PADDING = 15
+
     def __init__(self, dpg):
         self.dpg = dpg
         self.list_time = self.create_time_list()
 
         with self.dpg.window(label="Pomodoro Timer Settings",
-                        id="Settings GUI",
-                        height=self.dpg.get_viewport_height(),
-                        width=self.dpg.get_viewport_width()) as pomodoro_settings_window:
+                             id="Settings GUI",
+                             height=self.dpg.get_viewport_height(),
+                             width=self.dpg.get_viewport_width()):
+            self.create_items()
 
-            self.add_and_load_image('resources/images/tomato-banner.png', pomodoro_settings_window)
-            self.comboFocusTime = dpg.add_combo(label="Focus Time",
-                                                id="Focus Time Combo",
-                                                items=self.list_time,
-                                                default_value=25)
-            self.comboSmallBreak = dpg.add_combo(label="Small Break",
-                                                 id="Small Break Combo",
-                                                 items=self.list_time,
-                                                 default_value=2)
-            self.comboLongBreak = dpg.add_combo(label="Long Break",
-                                                id="Long Break Combo",
-                                                items=self.list_time,
-                                                default_value=15)
-            self.buttonStart = dpg.add_button(label="Start Pomodoro!",
-                                              id="Start",
-                                              callback=self.start_button_callback)
-            self.dpg.set_primary_window(pomodoro_settings_window, value=True)
+        # self.dpg.set_item_theme(item="Settings GUI", theme=self.dpg.mvThemeCol_WindowBg)
+        self.dpg.set_primary_window(PomodoroSettings.SETTINGS_WINDOW_TAG, value=True)
+
+    def create_items(self):
+        self.dpg.add_dummy(width=50)
+        self.dpg.add_same_line()
+        self.add_and_load_image('resources/images/tomato-banner.png', "Settings GUI")
+
+        self.dpg.add_dummy(height=50)
+        self.dpg.add_dummy(width=275)
+        self.dpg.add_same_line()
+        with self.dpg.child(label="configurations",
+                            height=300,
+                            width=800) as configurations:
+            # combo focus timer
+            self.dpg.add_combo(id="Focus Time Combo",
+                               items=self.list_time,
+                               width=PomodoroSettings.CONFIGURATION_COMBO_WIDTH,
+                               default_value=25)
+            self.dpg.add_dummy(height=PomodoroSettings.CONFIGURATION_ITEM_PADDING)
+
+            # combo for small break
+            self.dpg.add_combo(id="Small Break Combo",
+                               items=self.list_time,
+                               width=PomodoroSettings.CONFIGURATION_COMBO_WIDTH,
+                               default_value=2)
+            self.dpg.add_dummy(height=PomodoroSettings.CONFIGURATION_ITEM_PADDING)
+
+            # combo for long break
+            self.dpg.add_combo(id="Long Break Combo",
+                               items=self.list_time,
+                               width=PomodoroSettings.CONFIGURATION_COMBO_WIDTH,
+                               default_value=15)
+            self.dpg.add_dummy(height=PomodoroSettings.CONFIGURATION_ITEM_PADDING)
+
+            # start button
+            self.dpg.add_dummy(width=100)
+            self.dpg.add_same_line()
+            self.dpg.add_button(label="Start Pomodoro!",
+                                id="Start",
+                                height=100,
+                                width=200,
+                                callback=self.start_button_callback)
+
+            self.create_hover_items()
+
+
+
+    def create_hover_items(self):
+        with self.dpg.tooltip("Focus Time Combo"):
+            self.dpg.add_text("Focus Mins")
+
+        with self.dpg.tooltip("Small Break Combo"):
+            self.dpg.add_text("Small Break")
+
+        with self.dpg.tooltip("Long Break Combo"):
+            self.dpg.add_text("Long Break")
+
+        with self.dpg.tooltip("Start"):
+            self.dpg.add_text("Start Pomodoro Session")
 
     # grabbed from the documents
     def add_and_load_image(self, image_path, parent=None):
@@ -42,7 +92,7 @@ class PomodoroSettings:
 
     def start_button_callback(self):
         PomodoroTimer(self.dpg, self)  # starts the timer
-        self.dpg.hide_item("Settings GUI")
+        self.dpg.hide_item(PomodoroSettings.SETTINGS_WINDOW_TAG)
 
     def get_focus_time(self):
         return int(self.dpg.get_value("Focus Time Combo"))
@@ -55,11 +105,11 @@ class PomodoroSettings:
 
     def create_time_list(self):
         time_list = []
-        # for i in range(1, 61):  # creates a list between 1 - 60 mins to choose for the time
-        #     time_list.append(i)
+        for i in range(1, 61):  # creates a list between 1 - 60 mins to choose for the time
+            time_list.append(i)
 
         # debug purposes
-        for i in range(0, 2):
-            time_list.append(i)
+        # for i in range(0, 2):
+        #     time_list.append(i)
 
         return time_list

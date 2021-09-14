@@ -6,14 +6,19 @@ def create_windows():
     dpg.set_viewport_title("Pomodoro Timer GUI")
     dpg.set_viewport_height(700)
     dpg.set_viewport_width(1000)
+
+    with dpg.theme(default_theme=True) as theme_id:
+        dpg.add_theme_color(dpg.mvThemeCol_WindowBg, (196, 45, 45), category=dpg.mvThemeCat_Core)
+        # dpg.add_theme_style()
+
     dpg.set_global_font_scale(1.25)
     PomodoroSettings(dpg)
     dpg.mvStyleVar_ItemInnerSpacing = 20
     dpg.start_dearpygui()
 
 if __name__ == '__main__':
-    dpg.show_style_editor()
-    dpg.show_documentation()
+    # dpg.show_style_editor()
+    # dpg.show_documentation()
     create_windows()
     print("Main thread ends")
 

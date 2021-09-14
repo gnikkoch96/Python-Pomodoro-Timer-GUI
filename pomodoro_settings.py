@@ -17,11 +17,10 @@ class PomodoroSettings:
                              width=self.dpg.get_viewport_width()):
             self.create_items()
 
-        # self.dpg.set_item_theme(item="Settings GUI", theme=self.dpg.mvThemeCol_WindowBg)
         self.dpg.set_primary_window(PomodoroSettings.SETTINGS_WINDOW_TAG, value=True)
 
     def create_items(self):
-        self.dpg.add_dummy(width=50)
+        self.dpg.add_dummy(width=30)
         self.dpg.add_same_line()
         self.add_and_load_image('resources/images/tomato-banner.png', "Settings GUI")
 
@@ -30,7 +29,16 @@ class PomodoroSettings:
         self.dpg.add_same_line()
         with self.dpg.child(label="configurations",
                             height=300,
-                            width=800) as configurations:
+                            width=800):
+            # themes for the configurations window
+            with self.dpg.theme(default_theme=True):
+                self.dpg.add_theme_color(self.dpg.mvThemeCol_ChildBg, (196, 45, 45), category=self.dpg.mvThemeCat_Core)
+                self.dpg.add_theme_color(self.dpg.mvThemeCol_Button, (65, 157, 161), category=self.dpg.mvThemeCat_Core)
+                self.dpg.add_theme_color(self.dpg.mvThemeCol_ScrollbarGrab, (65, 157, 161),
+                                         category=self.dpg.mvThemeCat_Core)
+                self.dpg.add_theme_style(self.dpg.mvStyleVar_ChildBorderSize, 0)
+                self.dpg.add_theme_style(self.dpg.mvStyleVar_FrameRounding, 6)
+
             # combo focus timer
             self.dpg.add_combo(id="Focus Time Combo",
                                items=self.list_time,
@@ -62,8 +70,6 @@ class PomodoroSettings:
                                 callback=self.start_button_callback)
 
             self.create_hover_items()
-
-
 
     def create_hover_items(self):
         with self.dpg.tooltip("Focus Time Combo"):

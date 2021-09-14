@@ -19,8 +19,14 @@ class PomodoroTimer:
         with self.dpg.window(label="Pomdoro Timer",
                              height=self.dpg.get_viewport_height(),
                              width=self.dpg.get_viewport_width()) as self.pomodoro_window:
+            # themes
+
+            self.dpg.add_dummy(height=100)
+            # todo: this is just a placeholder for the dynamic texture that is going to be added later on
             self.create_displays()
             self.create_buttons()
+
+
 
         self.dpg.set_primary_window(self.pomodoro_window, value=True)
 
@@ -77,10 +83,10 @@ class PomodoroTimer:
     def create_displays(self):
         display_min_time = self.dpg.add_input_text(label="min", id="Minute", default_value=self.timer.get_min_value())
         self.dpg.configure_item(display_min_time, enabled=False)
-
+        self.dpg.add_same_line()
         display_sec_time = self.dpg.add_input_text(label="sec", id="Second", default_value=self.timer.get_sec_value())
         self.dpg.configure_item(display_sec_time, enabled=False)
-
+        self.dpg.add_same_line()
         display_pomodoro_counter = self.dpg.add_input_text(label="# of Pomodoros",
                                                            id="PomodoroCounter",
                                                            default_value=0)  # later on default value will be read from a file

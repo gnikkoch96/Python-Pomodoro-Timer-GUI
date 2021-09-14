@@ -5,6 +5,9 @@ from playsound import playsound
 
 # Pomodoro_Timer used to handle/create the GUI for the timer
 class PomodoroTimer:
+    # static vars
+    DISPLAY_TEXT_WIDTH = 200  # width
+
     def __init__(self, dpg, settings):
         # initialize values
         self.dpg = dpg
@@ -19,14 +22,24 @@ class PomodoroTimer:
         with self.dpg.window(label="Pomdoro Timer",
                              height=self.dpg.get_viewport_height(),
                              width=self.dpg.get_viewport_width()) as self.pomodoro_window:
-            # themes
 
-            self.dpg.add_dummy(height=100)
             # todo: this is just a placeholder for the dynamic texture that is going to be added later on
+            # padding
+            self.dpg.add_dummy(height=250)
+            self.dpg.add_dummy(width=125)
+            self.dpg.add_same_line()
             self.create_displays()
+
+            # padding
+            self.dpg.add_dummy(height=100)
+            self.dpg.add_dummy(width=325)
+            self.dpg.add_same_line()
+
             self.create_buttons()
 
-
+            # apply fonts to items
+            self.dpg.set_item_font("Minute", "Timer Font")
+            self.dpg.set_item_font("Second", "Timer Font")
 
         self.dpg.set_primary_window(self.pomodoro_window, value=True)
 
@@ -81,14 +94,33 @@ class PomodoroTimer:
         self.pomodoro_timer_thread.start()
 
     def create_displays(self):
-        display_min_time = self.dpg.add_input_text(label="min", id="Minute", default_value=self.timer.get_min_value())
+        display_min_time = self.dpg.add_input_text(label="min",
+                                                   id="Minute",
+                                                   height=PomodoroTimer.DISPLAY_TEXT_WIDTH,
+                                                   width=PomodoroTimer.DISPLAY_TEXT_WIDTH,
+                                                   default_value=self.timer.get_min_value())
         self.dpg.configure_item(display_min_time, enabled=False)
         self.dpg.add_same_line()
-        display_sec_time = self.dpg.add_input_text(label="sec", id="Second", default_value=self.timer.get_sec_value())
-        self.dpg.configure_item(display_sec_time, enabled=False)
+
+        # padding
+        self.dpg.add_dummy(width=50)
         self.dpg.add_same_line()
+
+        display_sec_time = self.dpg.add_input_text(label="sec",
+                                                   id="Second",
+                                                   height=PomodoroTimer.DISPLAY_TEXT_WIDTH,
+                                                   width=PomodoroTimer.DISPLAY_TEXT_WIDTH,
+                                                   default_value=self.timer.get_sec_value())
+        self.dpg.configure_item(display_sec_time, enabled=False)
+
+        # padding
+        self.dpg.add_dummy(height=50)
+        self.dpg.add_dummy(width=125)
+        self.dpg.add_same_line()
+
         display_pomodoro_counter = self.dpg.add_input_text(label="# of Pomodoros",
                                                            id="PomodoroCounter",
+                                                           width=550,
                                                            default_value=0)  # later on default value will be read from a file
         self.dpg.configure_item(display_pomodoro_counter, enabled=False)
 

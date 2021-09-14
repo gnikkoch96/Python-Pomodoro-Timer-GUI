@@ -20,20 +20,24 @@ class PomodoroSettings:
         self.dpg.set_primary_window(PomodoroSettings.SETTINGS_WINDOW_TAG, value=True)
 
     def create_items(self):
+        # padding
         self.dpg.add_dummy(width=30)
         self.dpg.add_same_line()
         self.add_and_load_image('resources/images/tomato-banner.png', "Settings GUI")
 
-        self.dpg.add_dummy(height=50)
+        self.dpg.add_dummy(height=20)
         self.dpg.add_dummy(width=275)
         self.dpg.add_same_line()
+
         with self.dpg.child(label="configurations",
                             height=300,
                             width=800):
             # themes for the configurations window
             with self.dpg.theme(default_theme=True):
-                self.dpg.add_theme_color(self.dpg.mvThemeCol_ChildBg, (196, 45, 45), category=self.dpg.mvThemeCat_Core)
-                self.dpg.add_theme_color(self.dpg.mvThemeCol_Button, (65, 157, 161), category=self.dpg.mvThemeCat_Core)
+                self.dpg.add_theme_color(self.dpg.mvThemeCol_ChildBg, (196, 45, 45),
+                                         category=self.dpg.mvThemeCat_Core)
+                self.dpg.add_theme_color(self.dpg.mvThemeCol_Button, (65, 157, 161),
+                                         category=self.dpg.mvThemeCat_Core)
                 self.dpg.add_theme_color(self.dpg.mvThemeCol_ScrollbarGrab, (65, 157, 161),
                                          category=self.dpg.mvThemeCat_Core)
                 self.dpg.add_theme_style(self.dpg.mvStyleVar_ChildBorderSize, 0)

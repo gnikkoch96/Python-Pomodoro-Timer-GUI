@@ -3,10 +3,10 @@ import dearpygui.dearpygui as dpg
 # add a font registry
 with dpg.font_registry():
     # add font (set as default for entire app)
-    dpg.add_font("resources/fonts/simplto2.ttf", 50, default_font=True)
+    dpg.add_font("../resources/fonts/simplto2.ttf", 50, default_font=True)
 
     # add second font
-    dpg.add_font("resources/fonts/Simpleton-Gothic.ttf", 50, id="secondary_font")
+    dpg.add_font("../resources/fonts/Simpleton-Gothic.ttf", 50, id="secondary_font")
 
 with dpg.window(label="Font Example"):
     dpg.add_button(label="Default font")

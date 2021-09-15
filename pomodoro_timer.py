@@ -23,7 +23,7 @@ class PomodoroTimer:
                              height=self.dpg.get_viewport_height(),
                              width=self.dpg.get_viewport_width()) as self.pomodoro_window:
 
-            # todo: this is just a placeholder for the dynamic texture that is going to be added later on
+            # todo: place texture here
             # padding
             self.dpg.add_dummy(height=250)
             self.dpg.add_dummy(width=125)

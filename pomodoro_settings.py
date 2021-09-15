@@ -23,6 +23,7 @@ class PomodoroSettings:
         # padding
         self.dpg.add_dummy(width=30)
         self.dpg.add_same_line()
+        # self.add_and_load_image('resources/images/studying.gif', "Settings GUI")
         self.add_and_load_image('resources/images/tomato-banner.png', "Settings GUI")
 
         self.dpg.add_dummy(height=20)
@@ -90,6 +91,7 @@ class PomodoroSettings:
 
     # grabbed from the documents
     def add_and_load_image(self, image_path, parent=None):
+        print(type(self.dpg.load_image(image_path)))
         width, height, channels, data = self.dpg.load_image(image_path)
 
         with self.dpg.texture_registry() as reg_id:

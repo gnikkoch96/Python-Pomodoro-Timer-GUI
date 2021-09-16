@@ -23,9 +23,13 @@ class PomodoroTimer:
                              height=self.dpg.get_viewport_height(),
                              width=self.dpg.get_viewport_width()) as self.pomodoro_window:
 
-            # todo: place texture here
             # padding
-            self.dpg.add_dummy(height=250)
+            self.dpg.add_dummy(width=280)
+            self.dpg.add_same_line()
+            self.add_and_load_image("resources/images/studying.png")
+
+            # padding
+            self.dpg.add_dummy(height=10)
             self.dpg.add_dummy(width=125)
             self.dpg.add_same_line()
             self.create_displays()
@@ -50,12 +54,7 @@ class PomodoroTimer:
 
     def update_gui(self):  # this is a thread function used to update the gui with the timer min and sec values
         print("---Update Pomodoro Timer GUI Thread Started---")
-        while not self.timer.timer_stop and (self.timer.get_min_value() >= 0 and self.timer.get_sec_value() >= 0):
-            if self.timer.get_min_value() <= 0 and self.timer.get_sec_value() <= 0:
-                break
-
-            self.dpg.set_value("Minute", self.timer.get_min_value())
-            self.dpg.set_value("Second", self.timer.get_sec_value())
+        self.update_min_and_sec()
 
         # only add to counter if the timer finishes (not when the user presses stop or restart)
         if self.timer.get_min_value() <= 0 and self.timer.get_sec_value() <= 0:
@@ -76,6 +75,14 @@ class PomodoroTimer:
 
         print("---Update Pomodoro Timer GUI Thread Ended---")
 
+    def update_min_and_sec(self):
+        while not self.timer.timer_stop and (self.timer.get_min_value() >= 0 and self.timer.get_sec_value() >= 0):
+            if self.timer.get_min_value() <= 0 and self.timer.get_sec_value() <= 0:
+                break
+
+            self.dpg.set_value("Minute", self.timer.get_min_value())
+            self.dpg.set_value("Second", self.timer.get_sec_value())
+            
     def update_pomodoro_counters(self):
         pomodoro_counter = int(self.dpg.get_value("PomodoroCounter")) + 1
         self.local_pomodoro_counter = pomodoro_counter
@@ -141,6 +148,18 @@ class PomodoroTimer:
         if self.local_pomodoro_counter >= 4:
             self.dpg.add_same_line()
             buttonLongBreak = self.dpg.add_button(label="Long Break", id="LongBreak", callback=self.longbreak_callback)
+
+    def add_and_load_image(self, image_path, parent=None):
+        print(type(self.dpg.load_image(image_path)))
+        width, height, channels, data = self.dpg.load_image(image_path)
+
+        with self.dpg.texture_registry() as reg_id:
+            texture_id = self.dpg.add_static_texture(width, height, data, parent=reg_id)
+
+        if parent is None:
+            return self.dpg.add_image(texture_id)
+        else:
+            return self.dpg.add_image(texture_id, parent=parent)
 
     def focus_callback(self):
         self.event.set()

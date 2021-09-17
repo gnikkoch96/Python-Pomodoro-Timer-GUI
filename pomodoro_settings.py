@@ -20,19 +20,15 @@ class PomodoroSettings:
         self.dpg.set_primary_window(PomodoroSettings.SETTINGS_WINDOW_TAG, value=True)
 
     def create_items(self):
-        # padding
-        self.dpg.add_dummy(width=30)
-        self.dpg.add_same_line()
-        # self.add_and_load_image('resources/images/studying.gif', "Settings GUI")
+        self.add_padding(30, 0, True)
         self.add_and_load_image('resources/images/tomato-banner.png', "Settings GUI")
 
-        self.dpg.add_dummy(height=20)
-        self.dpg.add_dummy(width=275)
-        self.dpg.add_same_line()
-
+        self.add_padding(275, 20, True)
         with self.dpg.child(label="configurations",
                             height=300,
                             width=800):
+
+            # todo: move this to a seperate method called add_configurations_theme()
             # themes for the configurations window
             with self.dpg.theme(default_theme=True):
                 self.dpg.add_theme_color(self.dpg.mvThemeCol_ChildBg, (196, 45, 45),
@@ -66,8 +62,7 @@ class PomodoroSettings:
             self.dpg.add_dummy(height=PomodoroSettings.CONFIGURATION_ITEM_PADDING)
 
             # start button
-            self.dpg.add_dummy(width=100)
-            self.dpg.add_same_line()
+            self.add_padding(100, 0, True)
             self.dpg.add_button(label="Start Pomodoro!",
                                 id="Start",
                                 height=100,
@@ -89,7 +84,16 @@ class PomodoroSettings:
         with self.dpg.tooltip("Start"):
             self.dpg.add_text("Start Pomodoro Session")
 
-    # grabbed from the documents
+    def add_padding(self, width_value=0, height_value=0, is_same_line=False):
+        if height_value != 0:
+            self.dpg.add_dummy(height=height_value)
+
+        if width_value != 0:
+            self.dpg.add_dummy(width=width_value)
+
+        if is_same_line:
+            self.dpg.add_same_line()
+
     def add_and_load_image(self, image_path, parent=None):
         print(type(self.dpg.load_image(image_path)))
         width, height, channels, data = self.dpg.load_image(image_path)
@@ -103,8 +107,8 @@ class PomodoroSettings:
             return self.dpg.add_image(texture_id, parent=parent)
 
     def start_button_callback(self):
-        PomodoroTimer(self.dpg, self)  # starts the timer
         self.dpg.hide_item(PomodoroSettings.SETTINGS_WINDOW_TAG)
+        PomodoroTimer(self.dpg, self)  # starts the timer
 
     def get_focus_time(self):
         return int(self.dpg.get_value("Focus Time Combo"))

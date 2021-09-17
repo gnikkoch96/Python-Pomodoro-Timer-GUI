@@ -4,24 +4,22 @@ import time
 
 # Timer class used to handle the timer functionalities
 class Timer:
-    # initialize the timer with mins
-    def __init__(self, focus_mins, small_break_mins, long_break_mins):
+    def __init__(self, mins):
         # initialize values
-        self.focus_mins = focus_mins
-        self.small_break_mins = small_break_mins
-        self.long_break_mins = long_break_mins
-        self.mins = self.focus_mins
+        self.mins = mins
         self.sec = 0
 
-        # boolean logic to control timer thread
+        # todo: find a better way to store copy of the mins value
+        self.mins_copy = mins
+
         self.timer_pause = False
         self.timer_stop = False
         self.timer_restart = False
-        self.isFocus = True
-        self.isOnSmallBreak = False # it is a small break if it isn't a long break
-        self.isOnLongBreak = False # it is a long break if the # of pomodoros % 4 == 0
 
-        # threading related
+        self.isFocus = True
+        self.isOnSmallBreak = False  # it is a small break if it isn't a long break
+        self.isOnLongBreak = False  # it is a long break if the # of pomodoros % 4 == 0
+
         self.timer_event = threading.Event()
         self.timer_thread = threading.Thread(target=self.start_timer, daemon=True)
         self.timer_thread.start()
@@ -31,7 +29,7 @@ class Timer:
 
         # continue the timer until user stops, pauses, or restarts the timer
         # and when the timer has not finished
-        while not self.timer_stop and (self.mins >= 0 and self.sec >= 0):
+        while not self.timer_stop and (self.mins > 0 or self.sec > 0):
             if self.mins <= 0 and self.sec <= 0:
                 break
 
@@ -40,14 +38,7 @@ class Timer:
                 self.timer_event.clear()
             else:
                 if self.timer_restart:
-                    # checks to see which timer to restart to
-                    if self.isFocus:
-                        self.mins = self.focus_mins
-                    elif self.isOnLongBreak:
-                        self.mins = self.long_break_mins
-                    else:
-                        self.mins = self.small_break_mins
-
+                    self.mins = self.mins_copy
                     self.sec = 0
                     self.timer_restart = False
                 else:
@@ -59,7 +50,7 @@ class Timer:
                         self.sec -= 1
                         time.sleep(1)
 
-                print(self.mins, " min\n", self.sec, " sec")
+                print(self.mins, " min :", self.sec, " sec")
         print("[State: Finished] timer thread ends")
 
     def restart_timer(self):

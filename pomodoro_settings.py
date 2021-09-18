@@ -1,131 +1,122 @@
 from pomodoro_timer import PomodoroTimer
+from tools import Tools
 
 
+# Description: this class creates the GUI for the pomodoro settings
+# where the user can select their focus timer, small break timer, and long break time
 class PomodoroSettings:
     # static variables
-    SETTINGS_WINDOW_TAG = "Settings GUI"
+    SETTINGS_WINDOW_ID = "Settings GUI"
+    FOCUS_COMBO_ID = "Focus Timer Combo"
+    SMALL_BREAK_COMBO_ID = "Small Break Combo"
+    LONG_BREAK_COMBO_ID = "Long Break Combo"
+    START_BUTTON_ID = "Start"
     CONFIGURATION_COMBO_WIDTH = 400
-    CONFIGURATION_ITEM_PADDING = 15
+    CONFIGURATION_ITEM_HEIGHT_PADDING = 15
 
     def __init__(self, dpg):
         self.dpg = dpg
         self.list_time = self.create_time_list()
+        self.create_pomodoro_settings_window()
 
+    def create_pomodoro_settings_window(self):
         with self.dpg.window(label="Pomodoro Timer Settings",
-                             id="Settings GUI",
+                             id=PomodoroSettings.SETTINGS_WINDOW_ID,
                              height=self.dpg.get_viewport_height(),
-                             width=self.dpg.get_viewport_width()):
-            self.create_items()
+                             width=self.dpg.get_viewport_width(),
+                             no_resize=True):
+            self.create_pomodoro_settings_items()
 
-        self.dpg.set_primary_window(PomodoroSettings.SETTINGS_WINDOW_TAG, value=True)
+    def create_pomodoro_settings_items(self):
+        Tools.add_padding(self.dpg, 30, 0, True)
+        Tools.add_and_load_image(self.dpg, 'resources/images/tomato-banner.png', PomodoroSettings.SETTINGS_WINDOW_ID)
 
-    def create_items(self):
-        self.add_padding(30, 0, True)
-        self.add_and_load_image('resources/images/tomato-banner.png', "Settings GUI")
+        Tools.add_padding(self.dpg, 275, 20, True)
+        self.create_configuration_window()
 
-        self.add_padding(275, 20, True)
+    def create_configuration_window(self):
         with self.dpg.child(label="configurations",
                             height=300,
                             width=800):
+            self.add_configurations_theme()
+            self.create_configuration_items()
 
-            # todo: move this to a seperate method called add_configurations_theme()
-            # themes for the configurations window
-            with self.dpg.theme(default_theme=True):
-                self.dpg.add_theme_color(self.dpg.mvThemeCol_ChildBg, (196, 45, 45),
-                                         category=self.dpg.mvThemeCat_Core)
-                self.dpg.add_theme_color(self.dpg.mvThemeCol_Button, (65, 157, 161),
-                                         category=self.dpg.mvThemeCat_Core)
-                self.dpg.add_theme_color(self.dpg.mvThemeCol_ScrollbarGrab, (65, 157, 161),
-                                         category=self.dpg.mvThemeCat_Core)
-                self.dpg.add_theme_style(self.dpg.mvStyleVar_ChildBorderSize, 0)
-                self.dpg.add_theme_style(self.dpg.mvStyleVar_FrameRounding, 6)
+    def create_configuration_items(self):
+        # combo focus timer
+        self.dpg.add_combo(id=PomodoroSettings.FOCUS_COMBO_ID,
+                           items=self.list_time,
+                           width=PomodoroSettings.CONFIGURATION_COMBO_WIDTH,
+                           default_value=25)
+        Tools.add_padding(self.dpg, 0, PomodoroSettings.CONFIGURATION_ITEM_HEIGHT_PADDING, False)
 
-            # combo focus timer
-            self.dpg.add_combo(id="Focus Time Combo",
-                               items=self.list_time,
-                               width=PomodoroSettings.CONFIGURATION_COMBO_WIDTH,
-                               default_value=25)
-            self.dpg.add_dummy(height=PomodoroSettings.CONFIGURATION_ITEM_PADDING)
+        # combo for small break
+        self.dpg.add_combo(id=PomodoroSettings.SMALL_BREAK_COMBO_ID,
+                           items=self.list_time,
+                           width=PomodoroSettings.CONFIGURATION_COMBO_WIDTH,
+                           default_value=2)
+        Tools.add_padding(self.dpg, 0, PomodoroSettings.CONFIGURATION_ITEM_HEIGHT_PADDING, False)
 
-            # combo for small break
-            self.dpg.add_combo(id="Small Break Combo",
-                               items=self.list_time,
-                               width=PomodoroSettings.CONFIGURATION_COMBO_WIDTH,
-                               default_value=2)
-            self.dpg.add_dummy(height=PomodoroSettings.CONFIGURATION_ITEM_PADDING)
+        # combo for long break
+        self.dpg.add_combo(id=PomodoroSettings.LONG_BREAK_COMBO_ID,
+                           items=self.list_time,
+                           width=PomodoroSettings.CONFIGURATION_COMBO_WIDTH,
+                           default_value=15)
+        Tools.add_padding(self.dpg, 0, PomodoroSettings.CONFIGURATION_ITEM_HEIGHT_PADDING, False)
 
-            # combo for long break
-            self.dpg.add_combo(id="Long Break Combo",
-                               items=self.list_time,
-                               width=PomodoroSettings.CONFIGURATION_COMBO_WIDTH,
-                               default_value=15)
-            self.dpg.add_dummy(height=PomodoroSettings.CONFIGURATION_ITEM_PADDING)
+        # start button
+        Tools.add_padding(self.dpg, 100, 0, True)
+        self.dpg.add_button(label="Start Pomodoro!",
+                            id=PomodoroSettings.START_BUTTON_ID,
+                            height=100,
+                            width=200,
+                            callback=self.start_button_callback)
 
-            # start button
-            self.add_padding(100, 0, True)
-            self.dpg.add_button(label="Start Pomodoro!",
-                                id="Start",
-                                height=100,
-                                width=200,
-                                callback=self.start_button_callback)
+        self.create_configuration_hover_items()
 
-            self.create_hover_items()
+    def add_configurations_theme(self):
+        with self.dpg.theme(default_theme=True):
+            self.dpg.add_theme_color(self.dpg.mvThemeCol_ChildBg, (196, 45, 45),
+                                     category=self.dpg.mvThemeCat_Core)
+            self.dpg.add_theme_color(self.dpg.mvThemeCol_Button, (65, 157, 161),
+                                     category=self.dpg.mvThemeCat_Core)
+            self.dpg.add_theme_color(self.dpg.mvThemeCol_ScrollbarGrab, (65, 157, 161),
+                                     category=self.dpg.mvThemeCat_Core)
+            self.dpg.add_theme_style(self.dpg.mvStyleVar_ChildBorderSize, 0)
+            self.dpg.add_theme_style(self.dpg.mvStyleVar_FrameRounding, 6)
 
-    def create_hover_items(self):
-        with self.dpg.tooltip("Focus Time Combo"):
+    def create_configuration_hover_items(self):
+        with self.dpg.tooltip(PomodoroSettings.FOCUS_COMBO_ID):
             self.dpg.add_text("Focus Mins")
 
-        with self.dpg.tooltip("Small Break Combo"):
+        with self.dpg.tooltip(PomodoroSettings.SMALL_BREAK_COMBO_ID):
             self.dpg.add_text("Small Break")
 
-        with self.dpg.tooltip("Long Break Combo"):
+        with self.dpg.tooltip(PomodoroSettings.LONG_BREAK_COMBO_ID):
             self.dpg.add_text("Long Break")
 
-        with self.dpg.tooltip("Start"):
+        with self.dpg.tooltip(PomodoroSettings.START_BUTTON_ID):
             self.dpg.add_text("Start Pomodoro Session")
 
-    def add_padding(self, width_value=0, height_value=0, is_same_line=False):
-        if height_value != 0:
-            self.dpg.add_dummy(height=height_value)
-
-        if width_value != 0:
-            self.dpg.add_dummy(width=width_value)
-
-        if is_same_line:
-            self.dpg.add_same_line()
-
-    def add_and_load_image(self, image_path, parent=None):
-        print(type(self.dpg.load_image(image_path)))
-        width, height, channels, data = self.dpg.load_image(image_path)
-
-        with self.dpg.texture_registry() as reg_id:
-            texture_id = self.dpg.add_static_texture(width, height, data, parent=reg_id)
-
-        if parent is None:
-            return self.dpg.add_image(texture_id)
-        else:
-            return self.dpg.add_image(texture_id, parent=parent)
-
     def start_button_callback(self):
-        self.dpg.hide_item(PomodoroSettings.SETTINGS_WINDOW_TAG)
-        PomodoroTimer(self.dpg, self)  # starts the timer
+        self.dpg.hide_item(PomodoroSettings.SETTINGS_WINDOW_ID)
 
-    def get_focus_time(self):
-        return int(self.dpg.get_value("Focus Time Combo"))
-
-    def get_small_break(self):
-        return int(self.dpg.get_value("Small Break Combo"))
-
-    def get_long_break(self):
-        return int(self.dpg.get_value("Long Break Combo"))
+        # loads the pomodoro timer gui
+        PomodoroTimer(self.dpg, self)
 
     def create_time_list(self):
         time_list = []
-        for i in range(1, 61):  # creates a list between 1 - 60 mins to choose for the time
+
+        # user has the option to choose between 1 min to 60 mins
+        for i in range(1, 61):
             time_list.append(i)
 
-        # debug purposes
-        # for i in range(0, 2):
-        #     time_list.append(i)
-
         return time_list
+
+    def get_focus_time(self):
+        return int(self.dpg.get_value(PomodoroSettings.FOCUS_COMBO_ID))
+
+    def get_small_break(self):
+        return int(self.dpg.get_value(PomodoroSettings.SMALL_BREAK_COMBO_ID))
+
+    def get_long_break(self):
+        return int(self.dpg.get_value(PomodoroSettings.LONG_BREAK_COMBO_ID))

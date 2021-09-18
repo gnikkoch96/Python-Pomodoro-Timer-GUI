@@ -3,22 +3,20 @@ from timer import Timer
 from playsound import playsound
 
 
-# Pomodoro_Timer used to handle/create the GUI for the timer
+# Description: this class handles the display of the timer to the user (how much mins and secs are left)
 class PomodoroTimer:
     # static vars
     DISPLAY_TEXT_WIDTH = 200  # width
 
     def __init__(self, dpg, settings):
-        # initialize values
         self.dpg = dpg
         self.settings = settings
-        self.timer = Timer(self.settings.get_focus_time())
         self.local_pomodoro_counter = 0
-        # self.global_pomodoro_counter = 0
 
-        self.isFinished = False  # used to disable the buttons until user closes the finished window screen
+        # creates the timer thread
+        self.timer = Timer(self.settings.get_focus_time())
 
-        with self.dpg.window(label="Pomdoro Timer",
+        with self.dpg.window(label="Pomodoro Timer",
                              height=self.dpg.get_viewport_height(),
                              width=self.dpg.get_viewport_width()) as self.pomodoro_window:
 

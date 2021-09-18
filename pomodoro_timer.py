@@ -67,7 +67,7 @@ class PomodoroTimer:
 
     def update_min_and_sec(self):
         while not self.timer.timer_stop:
-            # todo: there is probably a better way of doing this
+            # todo: there is probably a better way of ending the thread
             if not self.dpg.is_dearpygui_running():
                 break
 

@@ -24,8 +24,6 @@ def create_windows():
     dpg.start_dearpygui()
 
 if __name__ == '__main__':
-    # dpg.show_style_editor()
-    # dpg.show_documentation()
     create_windows()
     print("Main thread ends")
 

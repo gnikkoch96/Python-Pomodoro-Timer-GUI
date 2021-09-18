@@ -19,11 +19,14 @@ def create_windows():
         dpg.add_theme_style(dpg.mvStyleVar_WindowPadding, 20, 0, category=dpg.mvThemeCat_Core)
 
     dpg.set_global_font_scale(1.25)
+
+    # loads the pomodoro settings
     PomodoroSettings(dpg)
-    dpg.mvStyleVar_ItemInnerSpacing = 20
+
     dpg.start_dearpygui()
 
 if __name__ == '__main__':
+    # dpg.show_documentation()
     create_windows()
     print("Main thread ends")
 

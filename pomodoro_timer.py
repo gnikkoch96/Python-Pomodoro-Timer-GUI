@@ -20,7 +20,8 @@ class PomodoroTimer:
 
         with self.dpg.window(label="Pomdoro Timer",
                              height=self.dpg.get_viewport_height(),
-                             width=self.dpg.get_viewport_width()) as self.pomodoro_window:
+                             width=self.dpg.get_viewport_width(),
+                             no_resize=True) as self.pomodoro_window:
 
             self.add_padding(280, 0, True)
             self.add_and_load_image("resources/images/studying.png")
@@ -34,7 +35,7 @@ class PomodoroTimer:
             self.dpg.set_item_font("Minute", "Timer Font")
             self.dpg.set_item_font("Second", "Timer Font")
 
-        self.dpg.set_primary_window(self.pomodoro_window, value=True)
+        # self.dpg.set_primary_window(self.pomodoro_window, value=True)
 
         self.event = threading.Event()
         self.pomodoro_timer_thread = threading.Thread(target=self.update_gui, daemon=True)

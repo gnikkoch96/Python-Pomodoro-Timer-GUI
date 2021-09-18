@@ -14,10 +14,11 @@ class PomodoroSettings:
         with self.dpg.window(label="Pomodoro Timer Settings",
                              id="Settings GUI",
                              height=self.dpg.get_viewport_height(),
-                             width=self.dpg.get_viewport_width()):
+                             width=self.dpg.get_viewport_width(),
+                             no_resize=True):
             self.create_items()
 
-        self.dpg.set_primary_window(PomodoroSettings.SETTINGS_WINDOW_TAG, value=True)
+        # self.dpg.set_primary_window(PomodoroSettings.SETTINGS_WINDOW_TAG, value=True)
 
     def create_items(self):
         self.add_padding(30, 0, True)

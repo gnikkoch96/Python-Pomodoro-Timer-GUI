@@ -1,12 +1,28 @@
 import threading
+import pomodoro_settings
 from timer import Timer
 from playsound import playsound
+from tools import Tools
+
+# static vars
+POMODORO_WINDOW_ID = "Pomodoro Timer"
+FINISHED_WINDOW_ID = "Finished Window"
+POMODORO_COUNTER_FIELD_ID = "Pomodoro Counter"
+MINUTE_FIELD_ID = "Minute"
+SECOND_FIELD_ID = "Second"
+PAUSE_BUTTON_ID = "Pause"
+STOP_BUTTON_ID = "Stop"
+RESTART_BUTTON_ID = "Restart"
+RESUME_BUTTON_ID = "Resume"
+FOCUS_BUTTON_ID = "Focus"
+SMALL_BREAK_BUTTON_ID = "Small Break"
+LONG_BREAK_BUTTON_ID = "Long Break"
+SOUND_PATH = "resources/sounds/chime.wav"
+DISPLAY_TEXT_WIDTH = 200
 
 
 # Description: this class handles the display of the timer to the user (how much mins and secs are left)
 class PomodoroTimer:
-    # static vars
-    DISPLAY_TEXT_WIDTH = 200  # width
 
     def __init__(self, dpg, settings):
         self.dpg = dpg
@@ -16,31 +32,72 @@ class PomodoroTimer:
         # creates the timer thread
         self.timer = Timer(self.settings.get_focus_time())
 
-        with self.dpg.window(label="Pomodoro Timer",
-                             height=self.dpg.get_viewport_height(),
-                             width=self.dpg.get_viewport_width()) as self.pomodoro_window:
+        self.create_pomodoro_timer_gui_window()
 
-            self.add_padding(280, 0, True)
-            self.add_and_load_image("resources/images/studying.png")
-
-            self.add_padding(125, 10, True)
-            self.create_displays()
-
-            self.add_padding(325, 100, True)
-            self.create_buttons()
-
-            self.dpg.set_item_font("Minute", "Timer Font")
-            self.dpg.set_item_font("Second", "Timer Font")
-
-        self.dpg.set_primary_window(self.pomodoro_window, value=True)
-
+        # threading and events
         self.event = threading.Event()
         self.pomodoro_timer_thread = threading.Thread(target=self.update_gui, daemon=True)
         self.pomodoro_timer_thread.start()
 
+    def create_pomodoro_timer_gui_window(self):
+        with self.dpg.window(label="Pomodoro Timer",
+                             id=POMODORO_WINDOW_ID,
+                             height=self.dpg.get_viewport_height(),
+                             width=self.dpg.get_viewport_width()):
+            self.create_pomodoro_timer_gui_items()
+
+    def create_pomodoro_timer_gui_items(self):
+        Tools.add_padding(self.dpg, 280, 0, True)
+        Tools.add_and_load_image(self.dpg, "resources/images/studying.png")
+
+        Tools.add_padding(self.dpg, 125, 10, True)
+        self.create_displays()
+
+        Tools.add_padding(self.dpg, 325, 100, True)
+        self.create_buttons()
+
+        self.dpg.set_item_font(MINUTE_FIELD_ID, "Timer Font")
+        self.dpg.set_item_font(SECOND_FIELD_ID, "Timer Font")
+
+    def create_displays(self):
+        self.dpg.add_input_text(label="min",
+                                id=MINUTE_FIELD_ID,
+                                height=DISPLAY_TEXT_WIDTH,
+                                width=DISPLAY_TEXT_WIDTH,
+                                default_value=self.timer.get_min_value())
+        self.dpg.configure_item(MINUTE_FIELD_ID, enabled=False)
+        self.dpg.add_same_line()
+
+        Tools.add_padding(self.dpg, 50, 0, True)
+        self.dpg.add_input_text(label="sec",
+                                id=SECOND_FIELD_ID,
+                                height=DISPLAY_TEXT_WIDTH,
+                                width=DISPLAY_TEXT_WIDTH,
+                                default_value=self.timer.get_sec_value())
+        self.dpg.configure_item(SECOND_FIELD_ID, enabled=False)
+
+        Tools.add_padding(self.dpg, 125, 50, True)
+        self.dpg.add_input_text(label="Pomodoros",
+                                id=POMODORO_COUNTER_FIELD_ID,
+                                width=550,
+                                default_value=0)
+        self.dpg.configure_item(POMODORO_COUNTER_FIELD_ID, enabled=False)
+
+    def create_buttons(self):
+        self.dpg.add_button(label="Stop", id=STOP_BUTTON_ID, callback=self.stop_callback)
+
+        self.dpg.add_same_line()
+        self.dpg.add_button(label="Restart", id=RESTART_BUTTON_ID, callback=self.restart_callback)
+
+        self.dpg.add_same_line()
+        self.dpg.add_button(label="Pause", id=PAUSE_BUTTON_ID, callback=self.pause_callback)
+
+        self.dpg.add_same_line()
+        self.dpg.add_button(label="Resume", id=RESUME_BUTTON_ID, callback=self.resume_callback)
+        self.dpg.hide_item(RESUME_BUTTON_ID)
+
     # this is a thread function used to update the gui with the timer min and sec values
     def update_gui(self):
-        print("---Update Pomodoro Timer GUI Thread Started---")
         self.update_min_and_sec()
 
         # only add to counter if the timer finishes (not when the user presses stop or restart)
@@ -52,36 +109,27 @@ class PomodoroTimer:
 
             self.create_finished_dialog()
 
-            # change the sound here
-            playsound('resources/sounds/chime.wav', block=False)
+            # change the sound here (block allows the program to continue w/o waiting for sound to finish)
+            playsound(SOUND_PATH, block=False)
 
             # pomodoro_timer gui waits for user to press a button or close dialog
             self.event.wait()
             self.event.clear()
-            self.dpg.delete_item("FinishedWindow")
+            self.dpg.delete_item(FINISHED_WINDOW_ID)
             self.restart_threads()
-
-        print("---Update Pomodoro Timer GUI Thread Ended---")
 
     def update_min_and_sec(self):
         while not self.timer.timer_stop:
-            # todo: there is probably a better way of ending the thread
-            if not self.dpg.is_dearpygui_running():
+            if not self.dpg.is_dearpygui_running() or (self.timer.get_min_value() <= 0 and self.timer.get_sec_value() <= 0):
                 break
 
-            if self.timer.get_min_value() <= 0 and self.timer.get_sec_value() <= 0:
-                break
-
-            self.dpg.set_value("Minute", self.timer.get_min_value())
-            self.dpg.set_value("Second", self.timer.get_sec_value())
+            self.dpg.set_value(MINUTE_FIELD_ID, self.timer.get_min_value())
+            self.dpg.set_value(SECOND_FIELD_ID, self.timer.get_sec_value())
 
     def update_pomodoro_counters(self):
-        # increments current pomodoro counter by 1
-        pomodoro_counter = int(self.dpg.get_value("PomodoroCounter")) + 1
+        pomodoro_counter = int(self.dpg.get_value(POMODORO_COUNTER_FIELD_ID)) + 1
         self.local_pomodoro_counter = pomodoro_counter
-        self.dpg.set_value("PomodoroCounter", str(pomodoro_counter))
-
-        # self.global_pomodoro_counter = pomodoro_counter
+        self.dpg.set_value(POMODORO_COUNTER_FIELD_ID, str(pomodoro_counter))
 
     # restarts the timer and the gui threads
     def restart_threads(self):
@@ -93,9 +141,34 @@ class PomodoroTimer:
             mins = self.settings.get_long_break()
 
         self.timer = Timer(mins)
-
         self.pomodoro_timer_thread = threading.Thread(target=self.update_gui, daemon=True)
         self.pomodoro_timer_thread.start()
+
+    def create_finished_dialog(self):
+        with self.dpg.window(label="Finished!",
+                             id=FINISHED_WINDOW_ID,
+                             on_close=self.focus_callback,
+                             no_focus_on_appearing=False,
+                             height=self.dpg.get_viewport_height() / 2,
+                             width=self.dpg.get_viewport_width() / 2,
+                             modal=True,
+                             show=True):
+            Tools.add_padding(self.dpg, 80, 0, True)
+            Tools.add_and_load_image(self.dpg, "resources/images/finished.png")
+
+            Tools.add_padding(self.dpg, 80, True)
+            self.create_buttons_for_finished_session()
+
+    def create_buttons_for_finished_session(self):
+        self.dpg.add_button(label="Focus Time", id=FOCUS_BUTTON_ID, callback=self.focus_callback)
+
+        if self.local_pomodoro_counter >= 4:
+            self.dpg.add_same_line()
+            self.dpg.add_button(label="Long Break", id=LONG_BREAK_BUTTON_ID, callback=self.longbreak_callback)
+        else:
+            self.dpg.add_same_line()
+            self.dpg.add_button(label="Small Break", id=SMALL_BREAK_BUTTON_ID,
+                                callback=self.smallbreak_callback)
 
     def focus_callback(self):
         self.event.set()
@@ -120,109 +193,32 @@ class PomodoroTimer:
         self.timer.isOnSmallBreak = False
 
     def pause_callback(self):
-        self.dpg.hide_item("Pause")
-        self.dpg.show_item("Resume")
+        # replaces pause button with resume button
+        self.dpg.hide_item(PAUSE_BUTTON_ID)
+        self.dpg.show_item(RESUME_BUTTON_ID)
         self.timer.pause_timer()
 
     def resume_callback(self):
-        self.dpg.show_item("Pause")
-        self.dpg.hide_item("Resume")
+        # replaces replaces button with pause button
+        self.dpg.show_item(PAUSE_BUTTON_ID)
+        self.dpg.hide_item(RESUME_BUTTON_ID)
         self.timer.resume_timer()
 
+    # returns user to the settings
     def stop_callback(self):
-        # returns user to the settings
+
         # 1. stop the timer and gui thread
         self.timer.stop_timer()
 
         # 2. destroy the PomodoroTimer GUI
-        self.dpg.delete_item(self.pomodoro_window)
+        self.dpg.delete_item(POMODORO_WINDOW_ID)
 
         # 3. show the settings gui again
-        self.dpg.show_item("Settings GUI")
-        self.dpg.set_primary_window("Settings GUI", value=True)
+        self.dpg.show_item(pomodoro_settings.SETTINGS_WINDOW_ID)
 
     def restart_callback(self):
         # 1. resets the timer (in the Timer Class)
         self.timer.restart_timer()
+
         # 2. resets the counter for the pomodoro cycle (in the GUI Class)
         self.local_pomodoro_counter = 0
-
-    def create_finished_dialog(self):
-        with self.dpg.window(label="Finished!",
-                             modal=True,
-                             show=True,
-                             id="FinishedWindow",
-                             on_close=self.focus_callback,
-                             height=self.dpg.get_viewport_height() / 2,
-                             width=self.dpg.get_viewport_width() / 2):
-            self.add_padding(80, 0, True)
-            self.add_and_load_image("resources/images/finished.png")
-
-            self.add_padding(80, 40, True)
-            self.create_buttons_for_finished_session()
-
-    def create_displays(self):
-        display_min_time = self.dpg.add_input_text(label="min",
-                                                   id="Minute",
-                                                   height=PomodoroTimer.DISPLAY_TEXT_WIDTH,
-                                                   width=PomodoroTimer.DISPLAY_TEXT_WIDTH,
-                                                   default_value=self.timer.get_min_value())
-        self.dpg.configure_item(display_min_time, enabled=False)
-        self.dpg.add_same_line()
-
-        self.add_padding(50, 0, True)
-        display_sec_time = self.dpg.add_input_text(label="sec",
-                                                   id="Second",
-                                                   height=PomodoroTimer.DISPLAY_TEXT_WIDTH,
-                                                   width=PomodoroTimer.DISPLAY_TEXT_WIDTH,
-                                                   default_value=self.timer.get_sec_value())
-        self.dpg.configure_item(display_sec_time, enabled=False)
-
-        self.add_padding(125, 50, True)
-        display_pomodoro_counter = self.dpg.add_input_text(label="# of Pomodoros",
-                                                           id="PomodoroCounter",
-                                                           width=550,
-                                                           default_value=0)  # later on default value will be read from a file
-        self.dpg.configure_item(display_pomodoro_counter, enabled=False)
-
-    def create_buttons(self):
-        buttonStop = self.dpg.add_button(label="Stop", id="Stop", callback=self.stop_callback)
-        self.dpg.add_same_line()
-        buttonRestart = self.dpg.add_button(label="Restart", id="Restart", callback=self.restart_callback)
-        self.dpg.add_same_line()
-        buttonPause = self.dpg.add_button(label="Pause", id="Pause", callback=self.pause_callback)
-        self.dpg.add_same_line()
-        buttonResume = self.dpg.add_button(label="Resume", id="Resume", callback=self.resume_callback)
-        self.dpg.hide_item(buttonResume)
-
-    def create_buttons_for_finished_session(self):
-        buttonFocus = self.dpg.add_button(label="Focus Time", id="Focus", callback=self.focus_callback)
-
-        if self.local_pomodoro_counter >= 4:
-            self.dpg.add_same_line()
-            buttonLongBreak = self.dpg.add_button(label="Long Break", id="LongBreak", callback=self.longbreak_callback)
-        else:
-            self.dpg.add_same_line()
-            buttonSmallBreak = self.dpg.add_button(label="Small Break", id="SmallBreak",
-                                                   callback=self.smallbreak_callback)
-
-    def add_and_load_image(self, image_path, parent=None):
-        width, height, channels, data = self.dpg.load_image(image_path)
-
-        with self.dpg.texture_registry() as reg_id:
-            texture_id = self.dpg.add_static_texture(width, height, data, parent=reg_id)
-
-        if parent is None:
-            return self.dpg.add_image(texture_id)
-        else:
-            return self.dpg.add_image(texture_id, parent=parent)
-
-    def add_padding(self, width_value=0, height_value=0, is_same_line=False):
-        if height_value != 0:
-            self.dpg.add_dummy(height=height_value)
-
-        if width_value != 0:
-            self.dpg.add_dummy(width=width_value)
-
-        if is_same_line:
-            self.dpg.add_same_line()

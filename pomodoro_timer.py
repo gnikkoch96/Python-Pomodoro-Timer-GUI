@@ -126,6 +126,10 @@ class PomodoroTimer:
             self.dpg.set_value(MINUTE_FIELD_ID, self.timer.get_min_value())
             self.dpg.set_value(SECOND_FIELD_ID, self.timer.get_sec_value())
 
+        # waits for values to be set before deleting window (to prevent updating errors)
+        if self.timer.timer_stop:
+            self.dpg.delete_item(POMODORO_WINDOW_ID)
+
     def update_pomodoro_counters(self):
         pomodoro_counter = int(self.dpg.get_value(POMODORO_COUNTER_FIELD_ID)) + 1
         self.local_pomodoro_counter = pomodoro_counter
@@ -148,7 +152,6 @@ class PomodoroTimer:
         with self.dpg.window(label="Finished!",
                              id=FINISHED_WINDOW_ID,
                              on_close=self.focus_callback,
-                             no_focus_on_appearing=False,
                              height=self.dpg.get_viewport_height() / 2,
                              width=self.dpg.get_viewport_width() / 2,
                              modal=True,
@@ -156,7 +159,7 @@ class PomodoroTimer:
             Tools.add_padding(self.dpg, 80, 0, True)
             Tools.add_and_load_image(self.dpg, "resources/images/finished.png")
 
-            Tools.add_padding(self.dpg, 80, True)
+            Tools.add_padding(self.dpg, 80, 0, True)
             self.create_buttons_for_finished_session()
 
     def create_buttons_for_finished_session(self):
@@ -206,12 +209,10 @@ class PomodoroTimer:
 
     # returns user to the settings
     def stop_callback(self):
-
         # 1. stop the timer and gui thread
         self.timer.stop_timer()
 
-        # 2. destroy the PomodoroTimer GUI
-        self.dpg.delete_item(POMODORO_WINDOW_ID)
+        # 2. pomodoro timer window is deleted in the update to prevent item not found errors
 
         # 3. show the settings gui again
         self.dpg.show_item(pomodoro_settings.SETTINGS_WINDOW_ID)

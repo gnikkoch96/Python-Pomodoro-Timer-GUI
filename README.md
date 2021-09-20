@@ -4,16 +4,21 @@
 <!--Description-->
 <h2> Description </h2>
   <!--Describe the project (what is a pomodoro timer?)-->
-  <p> The Pomodoro Technique is a way to manage focus time for better performance (at least for me). The user has to choose a task to focus on for a set period of timer, and once 
-      that time has finished, then the user can take a small break or a long break depending on how my sessions the user has done (usually after 4 pomodoros focus sessions).</p>
+  <p> The Pomodoro Technique is a way to manage focus time for better performance (at least for me). The user has to choose a task to focus on for a set period of timer, and           once that time has finished, then the user can take a small break or a long break depending on how my sessions the user has done (usually after 4 pomodoros focus                 sessions).</p>
   
   <!--Explain why you made it-->
   <p> Pomodoro Timer GUI Python Vers. is a recreation of my Pomodro Timer GUI Java Vers. Since I have had some experience creating Swing GUIs using Java, I wanted to compare
-      the differences between these languages. For the most part the framework I've chosen (DearPyGUI) and the Swing framework were entirely different. The reason why I chose
-      DearPyGUI over other frameworks like Tkinter, QT, or Kivy is that it is open-source, I don't need to worry about the terms and conditions especially for a small project         like this, and it has a very active community (Discord and Reddit). </p>
+      the differences between these languages. For the most part the framework I've chosen (DearPyGUI) and the Swing framework were entirely different. For example instead
+      of actionListeners, we'd have to reference a callback method for the buttons. Also,we can generate multiple windows to appear at once with DearPyGUI whereas in the 
+      Swing framework is not the case.</p> 
+      
+  <p> The reason why I chose DearPyGUI over other frameworks like Tkinter, QT, or Kivy is that it is open-source, I don't need to worry about the terms and conditions especially       for a small project like this, and it has a very active community (Discord and Reddit). </p>
       
 <!--Technologies and Frameworks Used-->
 <h2> Technologies and Frameworks Used </h2>
+  <p> Make sure to install the DearPyGUI and Playsound Modules for it to work. You can follow the installation to DearPyGUI <a href="https://github.com/hoffstadt/DearPyGui">           here </a>, and install Playsound <a href="https://pypi.org/project/playsound/"> here </a>.</p> 
+  <p> You could always just do <i> pip install dearpygui </i> and <i> pip install playsound. </i> </p>
+  
   <ul>
     <li> <i> PyCharm IDE </i> - The environment used to code in Python </li>
     <li> <i> DearPyGUI Framework </i> - Framework used to create the GUI for this project </li>
@@ -53,4 +58,10 @@
   <img src="https://github.com/gnikkoch96/Python-Pomodoro-Timer-GUI/blob/master/resources/read_me%20stuff/Long%20Break%20Display.png"/>
   
 <!--What I learned-->
-  <h3> What I learned </h3> 
+<h2> What I learned </h2> 
+  <ul>
+    <li> When using a new framework like this, it is important to visit their communities (i.e. Discord and Reddit) for help as usually problems don't appear often in popular            sites like stackoverflow </li>
+    <li> Python has a more cleaner way of setting up a GUI as opposed to in Java. </li>
+    <li> Since threading was involved in counting down the tiemr and updating the GUI, I had to make them into daemon threads which meant that once the main thread ends it                ends the process almost immediately </li> 
+    <li> If I wanted a make a thread wait for another thread, I'd have to use the join() </li> 
+  </ul>

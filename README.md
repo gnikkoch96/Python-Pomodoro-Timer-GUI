@@ -9,8 +9,7 @@
   <!--Explain why you made it-->
   <p> Pomodoro Timer GUI Python Vers. is a recreation of my Pomodro Timer GUI Java Vers. Since I have had some experience creating Swing GUIs using Java, I wanted to compare
       the differences between these languages. For the most part the framework I've chosen (DearPyGUI) and the Swing framework were entirely different. For example instead
-      of actionListeners, we'd have to reference a callback method for the buttons. Also, we can generate multiple windows to appear at once with DearPyGUI whereas in the 
-      Swing framework is not the case.</p> 
+      of actionListeners, we'd have to reference a callback method for the buttons. Also, we can generate multiple windows within one frame to appear at once with DearPyGUI.           And above else I found it easier to create the GUI that I wanted with DearPyGUI as opposed to Swing. </p> 
       
   <p> The reason why I chose DearPyGUI over other frameworks like Tkinter, QT, or Kivy is that it is open-source, I don't need to worry about the terms and conditions especially       for a small project like this, and it has a very active community (Discord and Reddit). </p>
       
@@ -62,7 +61,7 @@
   <ul>
     <li> When using a new framework like this, it is important to visit their communities (i.e. Discord and Reddit) for help as usually problems don't appear often in popular            sites like stackoverflow </li>
     <li> Python has a more cleaner way of setting up a GUI as opposed to in Java. </li>
-    <li> Since threading was involved in counting down the tiemr and updating the GUI, I had to make them into daemon threads which meant that once the main thread ends it                ends the process almost immediately </li> 
+    <li> Since threading was involved in counting down the timer and updating the GUI, I had to make them into daemon threads which meant that once the main thread ends it                ends the process almost immediately </li> 
     <li> If I wanted a make a thread wait for another thread, I'd have to use the join() </li> 
   </ul>
 

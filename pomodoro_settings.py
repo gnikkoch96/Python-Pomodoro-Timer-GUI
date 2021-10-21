@@ -101,7 +101,7 @@ class PomodoroSettings:
         time_list = []
 
         # user has the option to choose between 1 min to 60 mins
-        for i in range(1, 61):
+        for i in range(1,61):
             time_list.append(i)
 
         return time_list

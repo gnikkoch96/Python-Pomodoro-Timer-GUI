@@ -17,7 +17,7 @@ RESUME_BUTTON_ID = "Resume"
 FOCUS_BUTTON_ID = "Focus"
 SMALL_BREAK_BUTTON_ID = "Small Break"
 LONG_BREAK_BUTTON_ID = "Long Break"
-SOUND_PATH = "resources/sounds/chime.wav"
+SOUND_PATH = "resources/sounds/bell.mp3"
 DISPLAY_TEXT_WIDTH = 200
 
 
@@ -110,7 +110,7 @@ class PomodoroTimer:
             self.create_finished_dialog()
 
             # change the sound here (block allows the program to continue w/o waiting for sound to finish)
-            playsound(SOUND_PATH, block=False)
+            playsound(SOUND_PATH)
 
             # pomodoro_timer gui waits for user to press a button or close dialog
             self.event.wait()

@@ -16,11 +16,11 @@
 <!--Technologies and Frameworks Used-->
 <h2> Technologies and Frameworks Used </h2>
   <p> Make sure to install the DearPyGUI and Playsound Modules for it to work. You can follow the installation to DearPyGUI <a href="https://github.com/hoffstadt/DearPyGui">           here </a>, and install Playsound <a href="https://pypi.org/project/playsound/"> here </a>.</p> 
-  <p> You could always just do <i> pip install dearpygui </i> and <i> pip install playsound. </i> </p>
+  <p> You could always just do <i> pip install dearpygui==1.0.2 </i> and <i> pip install playsound. </i> </p>
   
   <ul>
     <li> <i> PyCharm IDE </i> - The environment used to code in Python </li>
-    <li> <i> DearPyGUI Framework </i> - Framework used to create the GUI for this project </li>
+    <li> <i> DearPyGUI Framework v1.0.2 </i> - Framework used to create the GUI for this project </li>
     <li> <i> Playsound Module </i> - Imported the playsound module so that I could alert the user that their session was done </li>
     <li> <i> Python 3.9 </i> </li>
   </ul>

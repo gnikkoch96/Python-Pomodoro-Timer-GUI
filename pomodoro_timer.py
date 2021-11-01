@@ -168,7 +168,9 @@ class PomodoroTimer:
                              height=self.dpg.get_viewport_height() / 2,
                              width=self.dpg.get_viewport_width() / 2,
                              modal=True,
-                             show=True):
+                             show=True) as finished_win:
+            
+            self.dpg.bind_item_theme(finished_win, CONFIG_THEME_ID)
             with self.dpg.group(horizontal=True) as finished_img:
                 self.dpg.add_spacer(width=80)
                 Tools.add_and_load_image(self.dpg, "resources/images/finished.png")

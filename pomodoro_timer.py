@@ -4,7 +4,7 @@ from timer import Timer
 from playsound import playsound
 from tools import Tools
 
-# static vars
+# ids
 POMODORO_WINDOW_ID = "Pomodoro Timer"
 FINISHED_WINDOW_ID = "Finished Window"
 POMODORO_COUNTER_FIELD_ID = "Pomodoro Counter"
@@ -17,7 +17,15 @@ RESUME_BUTTON_ID = "Resume"
 FOCUS_BUTTON_ID = "Focus"
 SMALL_BREAK_BUTTON_ID = "Small Break"
 LONG_BREAK_BUTTON_ID = "Long Break"
+CONFIG_THEME_ID = "config-theme"
+
+# fonts
+DEFAULT_FONT_TAG = "default"
+TIMER_FONT_TAG = "timer-font"
+
+# vars
 SOUND_PATH = "resources/sounds/bell.mp3"
+STUDYING_IMAGE_PATH = "resources/images/studying.png"
 DISPLAY_TEXT_WIDTH = 200
 
 
@@ -28,7 +36,7 @@ class PomodoroTimer:
         self.dpg = dpg
         self.settings = settings
         self.local_pomodoro_counter = 0
-
+        
         # creates the timer thread
         self.timer = Timer(self.settings.get_focus_time())
 
@@ -41,60 +49,65 @@ class PomodoroTimer:
 
     def create_pomodoro_timer_gui_window(self):
         with self.dpg.window(label="Pomodoro Timer",
-                             id=POMODORO_WINDOW_ID,
+                             tag=POMODORO_WINDOW_ID,
                              height=self.dpg.get_viewport_height(),
-                             width=self.dpg.get_viewport_width()):
+                             width=self.dpg.get_viewport_width()) as timer_window:
+            self.dpg.bind_item_theme(timer_window, CONFIG_THEME_ID)
             self.create_pomodoro_timer_gui_items()
-
+        
     def create_pomodoro_timer_gui_items(self):
-        Tools.add_padding(self.dpg, 280, 0, True)
-        Tools.add_and_load_image(self.dpg, "resources/images/studying.png")
+        with self.dpg.group(horizontal=True) as study_img:
+            self.dpg.add_spacer(width=280)
+            Tools.add_and_load_image(self.dpg, STUDYING_IMAGE_PATH, study_img)
 
-        Tools.add_padding(self.dpg, 125, 10, True)
+        self.dpg.add_spacer(height=25)
         self.create_displays()
 
-        Tools.add_padding(self.dpg, 325, 100, True)
+        self.dpg.add_spacer(height=25)
         self.create_buttons()
 
-        self.dpg.set_item_font(MINUTE_FIELD_ID, "Timer Font")
-        self.dpg.set_item_font(SECOND_FIELD_ID, "Timer Font")
+        self.dpg.bind_item_font(MINUTE_FIELD_ID, "timer-font")
+        self.dpg.bind_item_font(SECOND_FIELD_ID, "timer-font")
 
     def create_displays(self):
-        self.dpg.add_input_text(label="min",
-                                id=MINUTE_FIELD_ID,
-                                height=DISPLAY_TEXT_WIDTH,
-                                width=DISPLAY_TEXT_WIDTH,
-                                default_value=self.timer.get_min_value())
-        self.dpg.configure_item(MINUTE_FIELD_ID, enabled=False)
-        self.dpg.add_same_line()
+        with self.dpg.group(horizontal=True) as displays:
+            self.dpg.add_spacer(height=10, width=125)
+            self.dpg.add_input_text(label="min",
+                                    tag=MINUTE_FIELD_ID,
+                                    height=DISPLAY_TEXT_WIDTH,
+                                    width=DISPLAY_TEXT_WIDTH,
+                                    default_value=self.timer.get_min_value())
+            self.dpg.configure_item(MINUTE_FIELD_ID, enabled=False)
 
-        Tools.add_padding(self.dpg, 50, 0, True)
-        self.dpg.add_input_text(label="sec",
-                                id=SECOND_FIELD_ID,
-                                height=DISPLAY_TEXT_WIDTH,
-                                width=DISPLAY_TEXT_WIDTH,
-                                default_value=self.timer.get_sec_value())
-        self.dpg.configure_item(SECOND_FIELD_ID, enabled=False)
+            self.dpg.add_spacer(width=35)
+            self.dpg.add_input_text(label="sec",
+                                    tag=SECOND_FIELD_ID,
+                                    height=DISPLAY_TEXT_WIDTH,
+                                    width=DISPLAY_TEXT_WIDTH,
+                                    default_value=self.timer.get_sec_value())
+            self.dpg.configure_item(SECOND_FIELD_ID, enabled=False)
 
-        Tools.add_padding(self.dpg, 125, 50, True)
-        self.dpg.add_input_text(label="Pomodoros",
-                                id=POMODORO_COUNTER_FIELD_ID,
-                                width=550,
-                                default_value=0)
-        self.dpg.configure_item(POMODORO_COUNTER_FIELD_ID, enabled=False)
+        self.dpg.add_spacer(height=75)
+        with self.dpg.group(horizontal=True) as pomodoro_counter:
+            self.dpg.add_spacer(width=125)
+            self.dpg.add_input_text(label="Pomodoros",
+                                    tag=POMODORO_COUNTER_FIELD_ID,
+                                    width=550,
+                                    default_value=0)
+            self.dpg.configure_item(POMODORO_COUNTER_FIELD_ID, enabled=False)
 
     def create_buttons(self):
-        self.dpg.add_button(label="Stop", id=STOP_BUTTON_ID, callback=self.stop_callback)
+        with self.dpg.group(horizontal=True) as func_buttons:
+            self.dpg.add_spacer(width=300)
+            self.dpg.add_button(label="Stop", tag=STOP_BUTTON_ID, callback=self.stop_callback)
 
-        self.dpg.add_same_line()
-        self.dpg.add_button(label="Restart", id=RESTART_BUTTON_ID, callback=self.restart_callback)
+            self.dpg.add_button(label="Restart", tag=RESTART_BUTTON_ID, callback=self.restart_callback)
 
-        self.dpg.add_same_line()
-        self.dpg.add_button(label="Pause", id=PAUSE_BUTTON_ID, callback=self.pause_callback)
+            self.dpg.add_button(label="Pause", tag=PAUSE_BUTTON_ID, callback=self.pause_callback)
 
-        self.dpg.add_same_line()
-        self.dpg.add_button(label="Resume", id=RESUME_BUTTON_ID, callback=self.resume_callback)
-        self.dpg.hide_item(RESUME_BUTTON_ID)
+            self.dpg.add_button(label="Resume", tag=RESUME_BUTTON_ID, callback=self.resume_callback)
+
+            self.dpg.hide_item(RESUME_BUTTON_ID)
 
     # this is a thread function used to update the gui with the timer min and sec values
     def update_gui(self):
@@ -156,22 +169,23 @@ class PomodoroTimer:
                              width=self.dpg.get_viewport_width() / 2,
                              modal=True,
                              show=True):
-            Tools.add_padding(self.dpg, 80, 0, True)
-            Tools.add_and_load_image(self.dpg, "resources/images/finished.png")
+            with self.dpg.group(horizontal=True) as finished_img:
+                self.dpg.add_spacer(width=80)
+                Tools.add_and_load_image(self.dpg, "resources/images/finished.png")
 
-            Tools.add_padding(self.dpg, 80, 0, True)
             self.create_buttons_for_finished_session()
 
     def create_buttons_for_finished_session(self):
-        self.dpg.add_button(label="Focus Time", id=FOCUS_BUTTON_ID, callback=self.focus_callback)
+        with self.dpg.group(parent=FINISHED_WINDOW_ID,
+                            horizontal=True):
+            self.dpg.add_spacer(width=80)
+            self.dpg.add_button(label="Focus Time", tag=FOCUS_BUTTON_ID, callback=self.focus_callback)
 
-        if self.local_pomodoro_counter >= 4:
-            self.dpg.add_same_line()
-            self.dpg.add_button(label="Long Break", id=LONG_BREAK_BUTTON_ID, callback=self.longbreak_callback)
-        else:
-            self.dpg.add_same_line()
-            self.dpg.add_button(label="Small Break", id=SMALL_BREAK_BUTTON_ID,
-                                callback=self.smallbreak_callback)
+            if self.local_pomodoro_counter >= 4:
+                self.dpg.add_button(label="Long Break", tag=LONG_BREAK_BUTTON_ID, callback=self.longbreak_callback)
+            else:
+                self.dpg.add_button(label="Small Break", tag=SMALL_BREAK_BUTTON_ID,
+                                    callback=self.smallbreak_callback)
 
     def focus_callback(self):
         self.event.set()

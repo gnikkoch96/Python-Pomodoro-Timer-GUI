@@ -7,6 +7,7 @@ FOCUS_COMBO_ID = "Focus Timer Combo"
 SMALL_BREAK_COMBO_ID = "Small Break Combo"
 LONG_BREAK_COMBO_ID = "Long Break Combo"
 START_BUTTON_ID = "Start"
+CONFIG_THEME_ID = "config-theme"
 CONFIGURATION_COMBO_WIDTH = 400
 CONFIGURATION_COMBO_HEIGHT_PADDING = 15
 
@@ -28,61 +29,54 @@ class PomodoroSettings:
             self.create_pomodoro_settings_items()
 
     def create_pomodoro_settings_items(self):
-        Tools.add_padding(self.dpg, 30, 0, True)
-        Tools.add_and_load_image(self.dpg, 'resources/images/tomato-banner.png', SETTINGS_WINDOW_ID)
+        with self.dpg.group(horizontal=True) as image_group:
+            self.dpg.add_spacer(width=30)
+            Tools.add_and_load_image(self.dpg, 'resources/images/tomato-banner.png', image_group)
 
-        Tools.add_padding(self.dpg, 275, 20, True)
-        self.create_configuration_window()
+        with self.dpg.group(horizontal=True) as config_group:
+            self.dpg.add_spacer(height=20,
+                                width=275)
+            self.create_configuration_window()
 
     def create_configuration_window(self):
-        with self.dpg.child(label="configurations",
+        with self.dpg.child_window(label="configurations",
                             height=300,
-                            width=800):
-            self.add_configurations_theme()
+                            width=800) as config_window:
+            self.dpg.bind_item_theme(config_window, CONFIG_THEME_ID)
             self.create_configuration_items()
 
     def create_configuration_items(self):
         # combo focus timer
-        self.dpg.add_combo(id=FOCUS_COMBO_ID,
+        self.dpg.add_combo(tag=FOCUS_COMBO_ID,
                            items=self.list_time,
                            width=CONFIGURATION_COMBO_WIDTH,
                            default_value=25)
-        Tools.add_padding(self.dpg, 0, CONFIGURATION_COMBO_HEIGHT_PADDING, False)
+        self.dpg.add_spacer(height=CONFIGURATION_COMBO_HEIGHT_PADDING)
 
         # combo for small break
-        self.dpg.add_combo(id=SMALL_BREAK_COMBO_ID,
+        self.dpg.add_combo(tag=SMALL_BREAK_COMBO_ID,
                            items=self.list_time,
                            width=CONFIGURATION_COMBO_WIDTH,
                            default_value=2)
-        Tools.add_padding(self.dpg, 0, CONFIGURATION_COMBO_HEIGHT_PADDING, False)
+        self.dpg.add_spacer(height=CONFIGURATION_COMBO_HEIGHT_PADDING)
 
         # combo for long break
-        self.dpg.add_combo(id=LONG_BREAK_COMBO_ID,
+        self.dpg.add_combo(tag=LONG_BREAK_COMBO_ID,
                            items=self.list_time,
                            width=CONFIGURATION_COMBO_WIDTH,
                            default_value=15)
-        Tools.add_padding(self.dpg, 0, CONFIGURATION_COMBO_HEIGHT_PADDING, False)
+        self.dpg.add_spacer(height=CONFIGURATION_COMBO_HEIGHT_PADDING)
 
         # start button
-        Tools.add_padding(self.dpg, 100, 0, True)
-        self.dpg.add_button(label="Start Pomodoro!",
-                            id=START_BUTTON_ID,
-                            height=100,
-                            width=200,
-                            callback=self.start_button_callback)
+        with self.dpg.group(horizontal=True) as button_item:
+            self.dpg.add_spacer(width=100)
+            self.dpg.add_button(label="Start Pomodoro!",
+                                tag=START_BUTTON_ID,
+                                height=100,
+                                width=200,
+                                callback=self.start_button_callback)
 
         self.create_configuration_hover_items()
-
-    def add_configurations_theme(self):
-        with self.dpg.theme(default_theme=True):
-            self.dpg.add_theme_color(self.dpg.mvThemeCol_ChildBg, (196, 45, 45),
-                                     category=self.dpg.mvThemeCat_Core)
-            self.dpg.add_theme_color(self.dpg.mvThemeCol_Button, (65, 157, 161),
-                                     category=self.dpg.mvThemeCat_Core)
-            self.dpg.add_theme_color(self.dpg.mvThemeCol_ScrollbarGrab, (65, 157, 161),
-                                     category=self.dpg.mvThemeCat_Core)
-            self.dpg.add_theme_style(self.dpg.mvStyleVar_ChildBorderSize, 0)
-            self.dpg.add_theme_style(self.dpg.mvStyleVar_FrameRounding, 6)
 
     def create_configuration_hover_items(self):
         with self.dpg.tooltip(FOCUS_COMBO_ID):

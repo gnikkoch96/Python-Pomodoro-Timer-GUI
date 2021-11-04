@@ -147,15 +147,21 @@ class PomodoroTimer:
                 print("LONG_BREAK_BUTTON_ID tag removed")
                 self.dpg.remove_alias(LONG_BREAK_BUTTON_ID)
                 self.restart_threads()
-        
 
     def update_min_and_sec(self):
         while not self.timer.timer_stop:
-            if not self.dpg.is_dearpygui_running() or (self.timer.get_min_value() <= 0 and self.timer.get_sec_value() <= 0):
+            if not self.dpg.is_dearpygui_running():
                 break
+
+            # if not self.dpg.is_dearpygui_running() or (self.timer.get_min_value() <= 0 and self.timer.get_sec_value() <= 0):
+            #     break
 
             self.dpg.set_value(MINUTE_FIELD_ID, self.timer.get_min_value())
             self.dpg.set_value(SECOND_FIELD_ID, self.timer.get_sec_value())
+
+            if self.timer.get_min_value() <= 0 and self.timer.get_sec_value() <= 0:
+                self.dpg.set_value(SECOND_FIELD_ID, 0)
+                break
 
         # waits for values to be set before deleting window (to prevent updating errors)
         if self.timer.timer_stop:
@@ -247,11 +253,11 @@ class PomodoroTimer:
             #                         callback=self.smallbreak_callback)
 
     def focus_callback(self):
+        self.event.set()
+
         self.timer.isOnLongBreak = False
         self.timer.isFocus = True
         self.timer.isOnSmallBreak = False
-
-        self.event.set()
 
     def smallbreak_callback(self):
         self.event.set()

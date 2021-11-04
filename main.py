@@ -8,6 +8,7 @@ DEFAULT_FONT_TAG = "default"
 TIMER_FONT_TAG = "timer-font"
 CONFIG_THEME_ID = "config-theme"
 
+
 def create_windows():
     dpg.create_context()
     dpg.create_viewport(title="(DearPyGUI) Pomodoro Timer", width=VIEWPORT_WIDTH, height=VIEWPORT_HEIGHT)
@@ -33,7 +34,8 @@ def create_dpg_fonts():
         dpg.add_font("resources/fonts/Simpleton-Gothic.ttf", 20, tag=DEFAULT_FONT_TAG)
         dpg.add_font("resources/fonts/Simpleton-Gothic.ttf", 60, tag=TIMER_FONT_TAG)
         dpg.bind_font(DEFAULT_FONT_TAG)
-        
+
+
 def create_dpg_themes():
     with dpg.theme(default_theme=True) as global_theme:
         with dpg.theme_component(dpg.mvAll):
@@ -44,11 +46,11 @@ def create_dpg_themes():
     with dpg.theme():
         with dpg.theme_component(tag=CONFIG_THEME_ID):
             dpg.add_theme_color(dpg.mvThemeCol_ChildBg, (196, 45, 45),
-                                    category=dpg.mvThemeCat_Core)
+                                category=dpg.mvThemeCat_Core)
             dpg.add_theme_color(dpg.mvThemeCol_Button, (65, 157, 161),
-                                    category=dpg.mvThemeCat_Core)
+                                category=dpg.mvThemeCat_Core)
             dpg.add_theme_color(dpg.mvThemeCol_ScrollbarGrab, (65, 157, 161),
-                                    category=dpg.mvThemeCat_Core)
+                                category=dpg.mvThemeCat_Core)
             dpg.add_theme_style(dpg.mvStyleVar_ChildBorderSize, 0)
             dpg.add_theme_style(dpg.mvStyleVar_FrameRounding, 6)
     dpg.bind_theme(global_theme)

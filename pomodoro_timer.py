@@ -130,6 +130,7 @@ class PomodoroTimer:
             self.event.clear()
             self.dpg.delete_item(FINISHED_WINDOW_ID)
             self.restart_threads()
+        
 
     def update_min_and_sec(self):
         while not self.timer.timer_stop:
@@ -142,6 +143,39 @@ class PomodoroTimer:
         # waits for values to be set before deleting window (to prevent updating errors)
         if self.timer.timer_stop:
             self.dpg.delete_item(POMODORO_WINDOW_ID)
+
+            # todo this is currently a workaround and could be fixed in the next update
+            self.remove_aliases()
+
+
+    def remove_aliases(self):
+        # displays
+        self.dpg.remove_alias(MINUTE_FIELD_ID)
+        self.dpg.remove_alias(SECOND_FIELD_ID)
+        self.dpg.remove_alias(POMODORO_COUNTER_FIELD_ID)
+
+        # buttons
+        self.dpg.remove_alias(PAUSE_BUTTON_ID)
+        self.dpg.remove_alias(STOP_BUTTON_ID)
+        self.dpg.remove_alias(RESTART_BUTTON_ID)
+        self.dpg.remove_alias(RESUME_BUTTON_ID)
+
+        # finished window
+        if self.dpg.get_item_alias(FINISHED_WINDOW_ID) is not None:
+            self.dpg.remove_alias(FINISHED_WINDOW_ID)
+
+        if self.dpg.get_item_alias(FOCUS_BUTTON_ID) is not None:
+            self.dpg.remove_alias(FOCUS_BUTTON_ID)
+
+        if self.dpg.get_item_alias(SMALL_BREAK_BUTTON_ID) is not None:
+            self.dpg.remove_alias(SMALL_BREAK_BUTTON_ID)
+        
+        if self.dpg.get_item_alias(LONG_BREAK_BUTTON_ID) is not None:
+            self.dpg.remove_alias(LONG_BREAK_BUTTON_ID)
+
+
+  
+
 
     def update_pomodoro_counters(self):
         pomodoro_counter = int(self.dpg.get_value(POMODORO_COUNTER_FIELD_ID)) + 1

@@ -129,7 +129,24 @@ class PomodoroTimer:
             self.event.wait()
             self.event.clear()
             self.dpg.delete_item(FINISHED_WINDOW_ID)
-            self.restart_threads()
+
+            # todo remove when patched
+            if self.dpg.does_alias_exist(FINISHED_WINDOW_ID):
+                print("FINISHED_WINDOW_ID tag removed")
+                self.dpg.remove_alias(FINISHED_WINDOW_ID)
+
+            if self.dpg.does_alias_exist(FOCUS_BUTTON_ID):
+                print("FOCUS_BUTTON_ID tag removed")
+                self.dpg.remove_alias(FOCUS_BUTTON_ID)
+
+            if self.dpg.does_alias_exist(SMALL_BREAK_BUTTON_ID):
+                print("SMALL_BREAK_BUTTON_ID tag removed")
+                self.dpg.remove_alias(SMALL_BREAK_BUTTON_ID)
+            
+            if self.dpg.does_alias_exist(LONG_BREAK_BUTTON_ID):
+                print("LONG_BREAK_BUTTON_ID tag removed")
+                self.dpg.remove_alias(LONG_BREAK_BUTTON_ID)
+                self.restart_threads()
         
 
     def update_min_and_sec(self):
@@ -161,16 +178,20 @@ class PomodoroTimer:
         self.dpg.remove_alias(RESUME_BUTTON_ID)
 
         # finished window
-        if self.dpg.get_item_alias(FINISHED_WINDOW_ID) is not None:
+        if self.dpg.does_alias_exist(FINISHED_WINDOW_ID):
+            print("FINISHED_WINDOW_ID tag removed")
             self.dpg.remove_alias(FINISHED_WINDOW_ID)
 
-        if self.dpg.get_item_alias(FOCUS_BUTTON_ID) is not None:
+        if self.dpg.does_alias_exist(FOCUS_BUTTON_ID):
+            print("FOCUS_BUTTON_ID tag removed")
             self.dpg.remove_alias(FOCUS_BUTTON_ID)
 
-        if self.dpg.get_item_alias(SMALL_BREAK_BUTTON_ID) is not None:
+        if self.dpg.does_alias_exist(SMALL_BREAK_BUTTON_ID):
+            print("SMALL_BREAK_BUTTON_ID tag removed")
             self.dpg.remove_alias(SMALL_BREAK_BUTTON_ID)
         
-        if self.dpg.get_item_alias(LONG_BREAK_BUTTON_ID) is not None:
+        if self.dpg.does_alias_exist(LONG_BREAK_BUTTON_ID):
+            print("LONG_BREAK_BUTTON_ID tag removed")
             self.dpg.remove_alias(LONG_BREAK_BUTTON_ID)
 
 
@@ -214,21 +235,23 @@ class PomodoroTimer:
     def create_buttons_for_finished_session(self):
         with self.dpg.group(parent=FINISHED_WINDOW_ID,
                             horizontal=True):
-            self.dpg.add_spacer(width=80)
             self.dpg.add_button(label="Focus Time", tag=FOCUS_BUTTON_ID, callback=self.focus_callback)
-
-            if self.local_pomodoro_counter >= 4:
-                self.dpg.add_button(label="Long Break", tag=LONG_BREAK_BUTTON_ID, callback=self.longbreak_callback)
-            else:
-                self.dpg.add_button(label="Small Break", tag=SMALL_BREAK_BUTTON_ID,
+            self.dpg.add_button(label="Small Break", tag=SMALL_BREAK_BUTTON_ID,
                                     callback=self.smallbreak_callback)
+            self.dpg.add_button(label="Long Break", tag=LONG_BREAK_BUTTON_ID, callback=self.longbreak_callback)
+
+            # if self.local_pomodoro_counter >= 4:
+            #     self.dpg.add_button(label="Long Break", tag=LONG_BREAK_BUTTON_ID, callback=self.longbreak_callback)
+            # else:
+            #     self.dpg.add_button(label="Small Break", tag=SMALL_BREAK_BUTTON_ID,
+            #                         callback=self.smallbreak_callback)
 
     def focus_callback(self):
-        self.event.set()
-
         self.timer.isOnLongBreak = False
         self.timer.isFocus = True
         self.timer.isOnSmallBreak = False
+
+        self.event.set()
 
     def smallbreak_callback(self):
         self.event.set()

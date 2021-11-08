@@ -175,13 +175,22 @@ class PomodoroTimer:
         # displays
         self.dpg.remove_alias(MINUTE_FIELD_ID)
         self.dpg.remove_alias(SECOND_FIELD_ID)
-        self.dpg.remove_alias(POMODORO_COUNTER_FIELD_ID)
+
+        if self.dpg.does_alias_exist(POMODORO_COUNTER_FIELD_ID):
+            self.dpg.remove_alias(POMODORO_COUNTER_FIELD_ID)
 
         # buttons
-        self.dpg.remove_alias(PAUSE_BUTTON_ID)
-        self.dpg.remove_alias(STOP_BUTTON_ID)
-        self.dpg.remove_alias(RESTART_BUTTON_ID)
-        self.dpg.remove_alias(RESUME_BUTTON_ID)
+        if self.dpg.does_alias_exist(PAUSE_BUTTON_ID):
+            self.dpg.remove_alias(PAUSE_BUTTON_ID)
+
+        if self.dpg.does_alias_exist(STOP_BUTTON_ID):
+            self.dpg.remove_alias(STOP_BUTTON_ID)
+
+        if self.dpg.does_alias_exist(RESTART_BUTTON_ID):
+            self.dpg.remove_alias(RESTART_BUTTON_ID)
+        
+        if self.dpg.does_alias_exist(RESUME_BUTTON_ID):
+            self.dpg.remove_alias(RESUME_BUTTON_ID)
 
         # finished window
         if self.dpg.does_alias_exist(FINISHED_WINDOW_ID):

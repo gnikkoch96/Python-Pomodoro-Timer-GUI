@@ -1,31 +1,11 @@
 import threading
 import pomodoro_settings
+import configs
 from timer import Timer
 from playsound import playsound
 from tools import Tools
 
-# ids
-POMODORO_WINDOW_ID = "Pomodoro Timer"
-FINISHED_WINDOW_ID = "Finished Window"
-POMODORO_COUNTER_FIELD_ID = "Pomodoro Counter"
-MINUTE_FIELD_ID = "Minute"
-SECOND_FIELD_ID = "Second"
-PAUSE_BUTTON_ID = "Pause"
-STOP_BUTTON_ID = "Stop"
-RESTART_BUTTON_ID = "Restart"
-RESUME_BUTTON_ID = "Resume"
-FOCUS_BUTTON_ID = "Focus"
-SMALL_BREAK_BUTTON_ID = "Small Break"
-LONG_BREAK_BUTTON_ID = "Long Break"
-CONFIG_THEME_ID = "config-theme"
-
-# fonts
-DEFAULT_FONT_TAG = "default"
-TIMER_FONT_TAG = "timer-font"
-
 # vars
-SOUND_PATH = "resources/sounds/bell.mp3"
-STUDYING_IMAGE_PATH = "resources/images/studying.png"
 DISPLAY_TEXT_WIDTH = 200
 
 
@@ -36,7 +16,7 @@ class PomodoroTimer:
         self.dpg = dpg
         self.settings = settings
         self.local_pomodoro_counter = 0
-        
+
         # creates the timer thread
         self.timer = Timer(self.settings.get_focus_time())
 
@@ -48,17 +28,19 @@ class PomodoroTimer:
         self.pomodoro_timer_thread.start()
 
     def create_pomodoro_timer_gui_window(self):
-        with self.dpg.window(label="Pomodoro Timer",
-                             tag=POMODORO_WINDOW_ID,
+        with self.dpg.window(tag=configs.POMODORO_WINDOW_ID,
                              height=self.dpg.get_viewport_height(),
                              width=self.dpg.get_viewport_width()) as timer_window:
-            self.dpg.bind_item_theme(timer_window, CONFIG_THEME_ID)
+            # todo cleanup
+            # binds theme
+            self.dpg.bind_item_theme(timer_window, configs.DEFAULT_THEME_ID)
+            self.dpg.set_primary_window(timer_window, True)
             self.create_pomodoro_timer_gui_items()
-        
+
     def create_pomodoro_timer_gui_items(self):
         with self.dpg.group(horizontal=True) as study_img:
             self.dpg.add_spacer(width=280)
-            Tools.add_and_load_image(self.dpg, STUDYING_IMAGE_PATH, study_img)
+            Tools.add_and_load_image(self.dpg, configs.STUDYING_IMAGE_PATH, study_img)
 
         self.dpg.add_spacer(height=25)
         self.create_displays()
@@ -66,48 +48,60 @@ class PomodoroTimer:
         self.dpg.add_spacer(height=25)
         self.create_buttons()
 
-        self.dpg.bind_item_font(MINUTE_FIELD_ID, "timer-font")
-        self.dpg.bind_item_font(SECOND_FIELD_ID, "timer-font")
+        # binds fonts to timer
+        self.dpg.bind_item_font(configs.POMODORO_MIN_FIELD_ID, configs.TIMER_FONT_TAG)
+        self.dpg.bind_item_font(configs.POMODORO_SEC_FIELD_ID, configs.TIMER_FONT_TAG)
 
     def create_displays(self):
-        with self.dpg.group(horizontal=True) as displays:
+        with self.dpg.group(horizontal=True):
+            # min display
             self.dpg.add_spacer(height=10, width=125)
-            self.dpg.add_input_text(label="min",
-                                    tag=MINUTE_FIELD_ID,
-                                    height=DISPLAY_TEXT_WIDTH,
-                                    width=DISPLAY_TEXT_WIDTH,
+            self.dpg.add_input_text(label=configs.POMODORO_MIN_FIELD_LABEL,
+                                    tag=configs.POMODORO_MIN_FIELD_ID,
+                                    width=configs.POMODORO_DISPLAY_TEXT_DIMENSION[0],
+                                    height=configs.POMODORO_DISPLAY_TEXT_DIMENSION[1],
                                     default_value=self.timer.get_min_value())
-            self.dpg.configure_item(MINUTE_FIELD_ID, enabled=False)
+            self.dpg.configure_item(configs.POMODORO_MIN_FIELD_ID, enabled=False)
 
+            # sec display
             self.dpg.add_spacer(width=35)
-            self.dpg.add_input_text(label="sec",
-                                    tag=SECOND_FIELD_ID,
-                                    height=DISPLAY_TEXT_WIDTH,
-                                    width=DISPLAY_TEXT_WIDTH,
+            self.dpg.add_input_text(label=configs.POMODORO_SEC_FIELD_LABEL,
+                                    tag=configs.POMODORO_SEC_FIELD_ID,
+                                    width=configs.POMODORO_DISPLAY_TEXT_DIMENSION[0],
+                                    height=configs.POMODORO_DISPLAY_TEXT_DIMENSION[1],
                                     default_value=self.timer.get_sec_value())
-            self.dpg.configure_item(SECOND_FIELD_ID, enabled=False)
+            self.dpg.configure_item(configs.POMODORO_SEC_FIELD_ID, enabled=False)
 
+        # pomodoro counter field
         self.dpg.add_spacer(height=75)
-        with self.dpg.group(horizontal=True) as pomodoro_counter:
+        with self.dpg.group(horizontal=True):
             self.dpg.add_spacer(width=125)
-            self.dpg.add_input_text(label="Pomodoros",
-                                    tag=POMODORO_COUNTER_FIELD_ID,
-                                    width=550,
+            self.dpg.add_input_text(label=configs.POMODORO_COUNTER_FIELD_LABEL,
+                                    tag=configs.POMODORO_COUNTER_FIELD_ID,
+                                    width=configs.POMODORO_COUNTER_FIELD_WIDTH,
                                     default_value=0)
-            self.dpg.configure_item(POMODORO_COUNTER_FIELD_ID, enabled=False)
+            self.dpg.configure_item(configs.POMODORO_COUNTER_FIELD_ID, enabled=False)
 
     def create_buttons(self):
         with self.dpg.group(horizontal=True) as func_buttons:
             self.dpg.add_spacer(width=300)
-            self.dpg.add_button(label="Stop", tag=STOP_BUTTON_ID, callback=self.stop_callback)
+            self.dpg.add_button(label="Stop",
+                                tag=configs.POMODORO_STOP_BTN_ID,
+                                callback=self.stop_callback)
 
-            self.dpg.add_button(label="Restart", tag=RESTART_BUTTON_ID, callback=self.restart_callback)
+            self.dpg.add_button(label="Restart",
+                                tag=configs.POMODORO_RESTART_BTN_ID,
+                                callback=self.restart_callback)
 
-            self.dpg.add_button(label="Pause", tag=PAUSE_BUTTON_ID, callback=self.pause_callback)
+            self.dpg.add_button(label="Pause",
+                                tag=configs.POMODORO_PAUSE_BTN_ID,
+                                callback=self.pause_callback)
 
-            self.dpg.add_button(label="Resume", tag=RESUME_BUTTON_ID, callback=self.resume_callback)
+            self.dpg.add_button(label="Resume",
+                                tag=configs.POMODORO_RESUME_BTN_ID,
+                                callback=self.resume_callback)
 
-            self.dpg.hide_item(RESUME_BUTTON_ID)
+            self.dpg.hide_item(configs.POMODORO_RESUME_BTN_ID)
 
     # this is a thread function used to update the gui with the timer min and sec values
     def update_gui(self):
@@ -123,29 +117,25 @@ class PomodoroTimer:
             self.create_finished_dialog()
 
             # change the sound here (block allows the program to continue w/o waiting for sound to finish)
-            playsound(SOUND_PATH)
+            playsound(configs.SOUND_PATH)
 
             # pomodoro_timer gui waits for user to press a button or close dialog
             self.event.wait()
             self.event.clear()
-            self.dpg.delete_item(FINISHED_WINDOW_ID)
+            self.dpg.delete_item(configs.POMODORO_FINISHED_WINDOW_ID)
 
             # todo remove when patched
-            if self.dpg.does_alias_exist(FINISHED_WINDOW_ID):
-                print("FINISHED_WINDOW_ID tag removed")
-                self.dpg.remove_alias(FINISHED_WINDOW_ID)
+            if self.dpg.does_alias_exist(configs.POMODORO_FINISHED_WINDOW_ID):
+                self.dpg.remove_alias(configs.POMODORO_FINISHED_WINDOW_ID)
 
-            if self.dpg.does_alias_exist(FOCUS_BUTTON_ID):
-                print("FOCUS_BUTTON_ID tag removed")
-                self.dpg.remove_alias(FOCUS_BUTTON_ID)
+            if self.dpg.does_alias_exist(configs.POMODORO_FOCUS_BTN_ID):
+                self.dpg.remove_alias(configs.POMODORO_FOCUS_BTN_ID)
 
-            if self.dpg.does_alias_exist(SMALL_BREAK_BUTTON_ID):
-                print("SMALL_BREAK_BUTTON_ID tag removed")
-                self.dpg.remove_alias(SMALL_BREAK_BUTTON_ID)
-            
-            if self.dpg.does_alias_exist(LONG_BREAK_BUTTON_ID):
-                print("LONG_BREAK_BUTTON_ID tag removed")
-                self.dpg.remove_alias(LONG_BREAK_BUTTON_ID)
+            if self.dpg.does_alias_exist(configs.POMODORO_SMALL_BREAK_BTN_ID):
+                self.dpg.remove_alias(configs.POMODORO_SMALL_BREAK_BTN_ID)
+
+            if self.dpg.does_alias_exist(configs.POMODORO_LONG_BREAK_BTN_ID):
+                self.dpg.remove_alias(configs.POMODORO_LONG_BREAK_BTN_ID)
                 self.restart_threads()
 
     def update_min_and_sec(self):
@@ -156,67 +146,61 @@ class PomodoroTimer:
             # if not self.dpg.is_dearpygui_running() or (self.timer.get_min_value() <= 0 and self.timer.get_sec_value() <= 0):
             #     break
 
-            self.dpg.set_value(MINUTE_FIELD_ID, self.timer.get_min_value())
-            self.dpg.set_value(SECOND_FIELD_ID, self.timer.get_sec_value())
+            self.dpg.set_value(configs.POMODORO_MIN_FIELD_ID, self.timer.get_min_value())
+            self.dpg.set_value(configs.POMODORO_SEC_FIELD_ID, self.timer.get_sec_value())
 
             if self.timer.get_min_value() <= 0 and self.timer.get_sec_value() <= 0:
-                self.dpg.set_value(SECOND_FIELD_ID, 0)
+                self.dpg.set_value(configs.POMODORO_SEC_FIELD_ID, 0)
                 break
 
         # waits for values to be set before deleting window (to prevent updating errors)
         if self.timer.timer_stop:
-            self.dpg.delete_item(POMODORO_WINDOW_ID)
+            self.dpg.delete_item(configs.POMODORO_WINDOW_ID)
 
             # todo this is currently a workaround and could be fixed in the next update
             self.remove_aliases()
 
-
     def remove_aliases(self):
         # displays
-        self.dpg.remove_alias(MINUTE_FIELD_ID)
-        self.dpg.remove_alias(SECOND_FIELD_ID)
+        if self.dpg.does_alias_exist(configs.POMODORO_MIN_FIELD_ID):
+            self.dpg.remove_alias(configs.POMODORO_MIN_FIELD_ID)
 
-        if self.dpg.does_alias_exist(POMODORO_COUNTER_FIELD_ID):
-            self.dpg.remove_alias(POMODORO_COUNTER_FIELD_ID)
+        if self.dpg.does_alias_exist(configs.POMODORO_SEC_FIELD_ID):
+            self.dpg.remove_alias(configs.POMODORO_SEC_FIELD_ID)
+
+        if self.dpg.does_alias_exist(configs.POMODORO_COUNTER_FIELD_ID):
+            self.dpg.remove_alias(configs.POMODORO_COUNTER_FIELD_ID)
 
         # buttons
-        if self.dpg.does_alias_exist(PAUSE_BUTTON_ID):
-            self.dpg.remove_alias(PAUSE_BUTTON_ID)
+        if self.dpg.does_alias_exist(configs.POMODORO_PAUSE_BTN_ID):
+            self.dpg.remove_alias(configs.POMODORO_PAUSE_BTN_ID)
 
-        if self.dpg.does_alias_exist(STOP_BUTTON_ID):
-            self.dpg.remove_alias(STOP_BUTTON_ID)
+        if self.dpg.does_alias_exist(configs.POMODORO_STOP_BTN_ID):
+            self.dpg.remove_alias(configs.POMODORO_STOP_BTN_ID)
 
-        if self.dpg.does_alias_exist(RESTART_BUTTON_ID):
-            self.dpg.remove_alias(RESTART_BUTTON_ID)
-        
-        if self.dpg.does_alias_exist(RESUME_BUTTON_ID):
-            self.dpg.remove_alias(RESUME_BUTTON_ID)
+        if self.dpg.does_alias_exist(configs.POMODORO_RESTART_BTN_ID):
+            self.dpg.remove_alias(configs.POMODORO_RESTART_BTN_ID)
+
+        if self.dpg.does_alias_exist(configs.POMODORO_RESUME_BTN_ID):
+            self.dpg.remove_alias(configs.POMODORO_RESUME_BTN_ID)
 
         # finished window
-        if self.dpg.does_alias_exist(FINISHED_WINDOW_ID):
-            print("FINISHED_WINDOW_ID tag removed")
-            self.dpg.remove_alias(FINISHED_WINDOW_ID)
+        if self.dpg.does_alias_exist(configs.POMODORO_FINISHED_WINDOW_ID):
+            self.dpg.remove_alias(configs.POMODORO_FINISHED_WINDOW_ID)
 
-        if self.dpg.does_alias_exist(FOCUS_BUTTON_ID):
-            print("FOCUS_BUTTON_ID tag removed")
-            self.dpg.remove_alias(FOCUS_BUTTON_ID)
+        if self.dpg.does_alias_exist(configs.POMODORO_FOCUS_BTN_ID):
+            self.dpg.remove_alias(configs.POMODORO_FOCUS_BTN_ID)
 
-        if self.dpg.does_alias_exist(SMALL_BREAK_BUTTON_ID):
-            print("SMALL_BREAK_BUTTON_ID tag removed")
-            self.dpg.remove_alias(SMALL_BREAK_BUTTON_ID)
-        
-        if self.dpg.does_alias_exist(LONG_BREAK_BUTTON_ID):
-            print("LONG_BREAK_BUTTON_ID tag removed")
-            self.dpg.remove_alias(LONG_BREAK_BUTTON_ID)
+        if self.dpg.does_alias_exist(configs.POMODORO_SMALL_BREAK_BTN_ID):
+            self.dpg.remove_alias(configs.POMODORO_SMALL_BREAK_BTN_ID)
 
-
-  
-
+        if self.dpg.does_alias_exist(configs.POMODORO_LONG_BREAK_BTN_ID):
+            self.dpg.remove_alias(configs.POMODORO_LONG_BREAK_BTN_ID)
 
     def update_pomodoro_counters(self):
-        pomodoro_counter = int(self.dpg.get_value(POMODORO_COUNTER_FIELD_ID)) + 1
+        pomodoro_counter = int(self.dpg.get_value(configs.POMODORO_COUNTER_FIELD_ID)) + 1
         self.local_pomodoro_counter = pomodoro_counter
-        self.dpg.set_value(POMODORO_COUNTER_FIELD_ID, str(pomodoro_counter))
+        self.dpg.set_value(configs.POMODORO_COUNTER_FIELD_ID, str(pomodoro_counter))
 
     # restarts the timer and the gui threads
     def restart_threads(self):
@@ -232,34 +216,33 @@ class PomodoroTimer:
         self.pomodoro_timer_thread.start()
 
     def create_finished_dialog(self):
-        with self.dpg.window(label="Finished!",
-                             id=FINISHED_WINDOW_ID,
+        with self.dpg.window(tag=configs.POMODORO_FINISHED_WINDOW_ID,
                              on_close=self.focus_callback,
-                             height=self.dpg.get_viewport_height() / 2,
-                             width=self.dpg.get_viewport_width() / 2,
+                             width=configs.POMODORO_FINISHED_WINDOW_DIMENSIONS[0],
+                             height=configs.POMODORO_FINISHED_WINDOW_DIMENSIONS[1],
+                             pos=configs.POMODORO_FINISHED_WINDOW_POS,
                              modal=True,
-                             show=True) as finished_win:
-            
-            self.dpg.bind_item_theme(finished_win, CONFIG_THEME_ID)
-            with self.dpg.group(horizontal=True) as finished_img:
+                             show=True):
+
+            # finished image
+            with self.dpg.group(horizontal=True):
                 self.dpg.add_spacer(width=80)
-                Tools.add_and_load_image(self.dpg, "resources/images/finished.png")
+                Tools.add_and_load_image(self.dpg, configs.FINISHED_IMAGE_PATH)
 
             self.create_buttons_for_finished_session()
 
     def create_buttons_for_finished_session(self):
-        with self.dpg.group(parent=FINISHED_WINDOW_ID,
+        with self.dpg.group(parent=configs.POMODORO_FINISHED_WINDOW_ID,
                             horizontal=True):
-            self.dpg.add_button(label="Focus Time", tag=FOCUS_BUTTON_ID, callback=self.focus_callback)
-            self.dpg.add_button(label="Small Break", tag=SMALL_BREAK_BUTTON_ID,
-                                    callback=self.smallbreak_callback)
-            self.dpg.add_button(label="Long Break", tag=LONG_BREAK_BUTTON_ID, callback=self.longbreak_callback)
-
-            # if self.local_pomodoro_counter >= 4:
-            #     self.dpg.add_button(label="Long Break", tag=LONG_BREAK_BUTTON_ID, callback=self.longbreak_callback)
-            # else:
-            #     self.dpg.add_button(label="Small Break", tag=SMALL_BREAK_BUTTON_ID,
-            #                         callback=self.smallbreak_callback)
+            self.dpg.add_button(label=configs.POMODORO_FOCUS_BTN_LABEL,
+                                tag=configs.POMODORO_FOCUS_BTN_ID,
+                                callback=self.focus_callback)
+            self.dpg.add_button(label=configs.POMODORO_SMALL_BREAK_BTN_LABEL,
+                                tag=configs.POMODORO_SMALL_BREAK_BTN_ID,
+                                callback=self.smallbreak_callback)
+            self.dpg.add_button(label=configs.POMODORO_LONG_BREAK_BTN_LABEL,
+                                tag=configs.POMODORO_LONG_BREAK_BTN_ID,
+                                callback=self.longbreak_callback)
 
     def focus_callback(self):
         self.event.set()
@@ -285,14 +268,14 @@ class PomodoroTimer:
 
     def pause_callback(self):
         # replaces pause button with resume button
-        self.dpg.hide_item(PAUSE_BUTTON_ID)
-        self.dpg.show_item(RESUME_BUTTON_ID)
+        self.dpg.hide_item(configs.POMODORO_PAUSE_BTN_ID)
+        self.dpg.show_item(configs.POMODORO_RESUME_BTN_ID)
         self.timer.pause_timer()
 
     def resume_callback(self):
         # replaces replaces button with pause button
-        self.dpg.show_item(PAUSE_BUTTON_ID)
-        self.dpg.hide_item(RESUME_BUTTON_ID)
+        self.dpg.show_item(configs.POMODORO_PAUSE_BTN_ID)
+        self.dpg.hide_item(configs.POMODORO_RESUME_BTN_ID)
         self.timer.resume_timer()
 
     # returns user to the settings
@@ -303,7 +286,7 @@ class PomodoroTimer:
         # 2. pomodoro timer window is deleted in the update to prevent item not found errors
 
         # 3. show the settings gui again
-        self.dpg.show_item(pomodoro_settings.SETTINGS_WINDOW_ID)
+        self.dpg.show_item(configs.SETTINGS_WINDOW_ID)
 
     def restart_callback(self):
         # 1. resets the timer (in the Timer Class)

@@ -1,12 +1,8 @@
 import threading
-import pomodoro_settings
 import configs
 from timer import Timer
 from playsound import playsound
 from tools import Tools
-
-# vars
-DISPLAY_TEXT_WIDTH = 200
 
 
 # Description: this class handles the display of the timer to the user (how much mins and secs are left)
@@ -38,14 +34,16 @@ class PomodoroTimer:
             self.create_pomodoro_timer_gui_items()
 
     def create_pomodoro_timer_gui_items(self):
+        # student studying image
+        # todo might change this to a dynamic image
         with self.dpg.group(horizontal=True) as study_img:
-            self.dpg.add_spacer(width=280)
+            self.dpg.add_spacer(width=configs.POMODORO_STUDY_IMG_SPACER[0])
             Tools.add_and_load_image(self.dpg, configs.STUDYING_IMAGE_PATH, study_img)
 
-        self.dpg.add_spacer(height=25)
+        self.dpg.add_spacer(height=configs.POMODORO_DISPLAYS_SPACER[1])
         self.create_displays()
 
-        self.dpg.add_spacer(height=25)
+        self.dpg.add_spacer(height=configs.POMODORO_BUTTONS_SPACER[1])
         self.create_buttons()
 
         # binds fonts to timer
@@ -55,7 +53,8 @@ class PomodoroTimer:
     def create_displays(self):
         with self.dpg.group(horizontal=True):
             # min display
-            self.dpg.add_spacer(height=10, width=125)
+            self.dpg.add_spacer(height=configs.POMODORO_MIN_DISPLAY_SPACER[1],
+                                width=configs.POMODORO_MIN_DISPLAY_SPACER[0])
             self.dpg.add_input_text(label=configs.POMODORO_MIN_FIELD_LABEL,
                                     tag=configs.POMODORO_MIN_FIELD_ID,
                                     width=configs.POMODORO_DISPLAY_TEXT_DIMENSION[0],
@@ -73,9 +72,9 @@ class PomodoroTimer:
             self.dpg.configure_item(configs.POMODORO_SEC_FIELD_ID, enabled=False)
 
         # pomodoro counter field
-        self.dpg.add_spacer(height=75)
+        self.dpg.add_spacer(height=configs.POMODORO_COUNTER_FIELD_SPACER[1])
         with self.dpg.group(horizontal=True):
-            self.dpg.add_spacer(width=125)
+            self.dpg.add_spacer(width=configs.POMODORO_COUNTER_FIELD_SPACER[0])
             self.dpg.add_input_text(label=configs.POMODORO_COUNTER_FIELD_LABEL,
                                     tag=configs.POMODORO_COUNTER_FIELD_ID,
                                     width=configs.POMODORO_COUNTER_FIELD_WIDTH,
@@ -83,21 +82,25 @@ class PomodoroTimer:
             self.dpg.configure_item(configs.POMODORO_COUNTER_FIELD_ID, enabled=False)
 
     def create_buttons(self):
-        with self.dpg.group(horizontal=True) as func_buttons:
-            self.dpg.add_spacer(width=300)
-            self.dpg.add_button(label="Stop",
+        with self.dpg.group(horizontal=True):
+            # stop btn
+            self.dpg.add_spacer(width=configs.POMODORO_BTN_SPACER[0])
+            self.dpg.add_button(label=configs.POMODORO_STOP_BTN_LABEL,
                                 tag=configs.POMODORO_STOP_BTN_ID,
                                 callback=self.stop_callback)
 
-            self.dpg.add_button(label="Restart",
+            # restart btn
+            self.dpg.add_button(label=configs.POMODORO_RESTART_BTN_LABEL,
                                 tag=configs.POMODORO_RESTART_BTN_ID,
                                 callback=self.restart_callback)
 
-            self.dpg.add_button(label="Pause",
+            # pause btn
+            self.dpg.add_button(label=configs.POMODORO_PAUSE_BTN_LABEL,
                                 tag=configs.POMODORO_PAUSE_BTN_ID,
                                 callback=self.pause_callback)
 
-            self.dpg.add_button(label="Resume",
+            # resume btn
+            self.dpg.add_button(label=configs.POMODORO_RESUME_BTN_LABEL,
                                 tag=configs.POMODORO_RESUME_BTN_ID,
                                 callback=self.resume_callback)
 
@@ -223,10 +226,9 @@ class PomodoroTimer:
                              pos=configs.POMODORO_FINISHED_WINDOW_POS,
                              modal=True,
                              show=True):
-
             # finished image
             with self.dpg.group(horizontal=True):
-                self.dpg.add_spacer(width=80)
+                self.dpg.add_spacer(width=configs.POMODORO_FINISHED_IMG_SPACER[0])
                 Tools.add_and_load_image(self.dpg, configs.FINISHED_IMAGE_PATH)
 
             self.create_buttons_for_finished_session()

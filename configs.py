@@ -46,6 +46,10 @@ SOUND_PATH = "resources/sounds/bell.mp3"
 STUDYING_IMAGE_PATH = "resources/images/studying.png"
 FINISHED_IMAGE_PATH = "resources/images/finished.png"
 
+# file related
+SETTINGS_FILENAME = "settings.txt"
+
+
 # main
 VIEWPORT_TITLE = "Pomodoro Timer"
 DPG_FONT_SCALE = 1.25

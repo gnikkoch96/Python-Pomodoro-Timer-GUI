@@ -282,17 +282,15 @@ class PomodoroTimer:
 
     # returns user to the settings
     def stop_callback(self):
-        # 1. stop the timer and gui thread
+        # stop the timer and gui thread
         self.timer.stop_timer()
 
-        # 2. pomodoro timer window is deleted in the update to prevent item not found errors
-
-        # 3. show the settings gui again
+        # show the settings gui again
         self.dpg.show_item(configs.SETTINGS_WINDOW_ID)
 
     def restart_callback(self):
-        # 1. resets the timer (in the Timer Class)
+        # resets the timer (in the Timer Class)
         self.timer.restart_timer()
 
-        # 2. resets the counter for the pomodoro cycle (in the GUI Class)
+        # resets the counter for the pomodoro cycle (in the GUI Class)
         self.local_pomodoro_counter = 0

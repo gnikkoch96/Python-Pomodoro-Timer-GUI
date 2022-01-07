@@ -1,6 +1,7 @@
 import configs
 from pomodoro_timer import PomodoroTimer
 from tools import Tools
+from os.path import exists
 
 
 # Description: this class creates the GUI for the pomodoro settings
@@ -9,6 +10,20 @@ class PomodoroSettings:
     def __init__(self, dpg):
         self.dpg = dpg
         self.list_time = PomodoroSettings.create_time_list()
+        self.default_time = [configs.SETTINGS_FOCUS_COMBO_DEFAULT_VALUE,
+                             configs.SETTINGS_SMALL_BREAK_COMBO_DEFAULT_VALUE,
+                             configs.SETTINGS_LONG_BREAK_COMBO_DEFAULT_VALUE]
+
+        # check if settings file exists
+        if exists(configs.SETTINGS_FILENAME):
+            settings_file = open(configs.SETTINGS_FILENAME, 'r')
+            line = settings_file.readlines()
+
+            for row in range(0, len(line)):
+                self.default_time[row] = line[row]
+
+            settings_file.close()
+
         self.create_pomodoro_settings_window()
 
     @staticmethod
@@ -58,21 +73,21 @@ class PomodoroSettings:
         self.dpg.add_combo(tag=configs.SETTINGS_FOCUS_COMBO_ID,
                            items=self.list_time,
                            width=configs.SETTINGS_COMBO_WIDTH,
-                           default_value=configs.SETTINGS_FOCUS_COMBO_DEFAULT_VALUE)
+                           default_value=self.default_time[0])
         self.dpg.add_spacer(height=configs.SETTINGS_COMBO_HEIGHT_PADDING)
 
         # combo for small break
         self.dpg.add_combo(tag=configs.SETTINGS_SMALL_BREAK_COMBO_ID,
                            items=self.list_time,
                            width=configs.SETTINGS_COMBO_WIDTH,
-                           default_value=configs.SETTINGS_SMALL_BREAK_COMBO_DEFAULT_VALUE)
+                           default_value=self.default_time[1])
         self.dpg.add_spacer(height=configs.SETTINGS_COMBO_HEIGHT_PADDING)
 
         # combo for long break
         self.dpg.add_combo(tag=configs.SETTINGS_LONG_BREAK_COMBO_ID,
                            items=self.list_time,
                            width=configs.SETTINGS_COMBO_WIDTH,
-                           default_value=configs.SETTINGS_LONG_BREAK_COMBO_DEFAULT_VALUE)
+                           default_value=self.default_time[2])
         self.dpg.add_spacer(height=configs.SETTINGS_COMBO_HEIGHT_PADDING)
 
         # start button
@@ -101,6 +116,13 @@ class PomodoroSettings:
 
     def start_button_callback(self):
         self.dpg.hide_item(configs.SETTINGS_WINDOW_ID)
+
+        # save setting configurations
+        settings_file = open(configs.SETTINGS_FILENAME, 'w')
+        settings_file.write(str(self.get_focus_time()) + '\n' +
+                            str(self.get_small_break()) + '\n' +
+                            str(self.get_long_break()))
+        settings_file.close()
 
         # loads the pomodoro timer gui
         PomodoroTimer(self.dpg, self)

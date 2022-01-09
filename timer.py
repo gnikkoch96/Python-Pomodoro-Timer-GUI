@@ -15,6 +15,7 @@ class Timer:
         self.timer_stop = False
         self.timer_restart = False
 
+        # initially the timer will be set to focus
         self.isFocus = True
         self.isOnSmallBreak = False
         self.isOnLongBreak = False

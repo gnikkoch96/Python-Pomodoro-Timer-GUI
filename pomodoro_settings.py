@@ -1,4 +1,5 @@
 import configs
+import json
 from pomodoro_timer import PomodoroTimer
 from tools import Tools
 from os.path import exists
@@ -15,16 +16,20 @@ class PomodoroSettings:
                              configs.SETTINGS_LONG_BREAK_COMBO_DEFAULT_VALUE]
 
         # check if settings file exists
-        if exists(configs.SETTINGS_FILENAME):
-            settings_file = open(configs.SETTINGS_FILENAME, 'r')
-            line = settings_file.readlines()
+        if exists(configs.USERDATA_FILEPATH):
+            user_data = open(configs.USERDATA_FILEPATH)
+            data = json.load(user_data)
 
-            for row in range(0, len(line)):
-                self.default_time[row] = line[row]
+            self.default_time[0] = data[configs.USERDATA_FOCUS_MINS]
+            self.default_time[1] = data[configs.USERDATA_SMALLBREAK_MINS]
+            self.default_time[2] = data[configs.USERDATA_LONGBREAK_MINS]
 
-            settings_file.close()
+            user_data.close()
+        else:
+            Tools.create_default_user_data()
 
         self.create_pomodoro_settings_window()
+
 
     @staticmethod
     # generates the list of mins that user can choose from
@@ -67,6 +72,81 @@ class PomodoroSettings:
         with self.dpg.child_window(width=configs.SETTINGS_CONFIG_WINDOW_DIMENSIONS[0],
                                    height=configs.SETTINGS_CONFIG_WINDOW_DIMENSIONS[1]):
             self.create_configuration_items()
+
+            # check data button
+            with self.dpg.group(horizontal=True):
+                self.dpg.add_spacer(width=configs.SETTINGS_DATA_BTN_SPACER[0])
+                self.dpg.add_button(tag=configs.SETTINGS_DATA_BTN_ID,
+                                    label=configs.SETTINGS_DATA_BTN_LABEL,
+                                    callback=self.data_callback)
+
+    # launches another window that display user information (i.e. # of mins productive)
+    def data_callback(self):
+        self.create_data_win()
+
+    def create_data_win(self):
+        with self.dpg.window(tag=configs.SETTINGS_DATA_WINDOW_ID,
+                             label=configs.SETTINGS_DATA_WINDOW_LABEL,
+                             width=configs.SETTINGS_DATA_WINDOW_DIMENSIONS[0],
+                             height=configs.SETTINGS_DATA_WINDOW_DIMENSIONS[1],
+                             pos=configs.SETTINGS_DATA_WINDOW_POS,
+                             on_close=self.cleanup_aliases,
+                             no_resize=True,
+                             modal=True):
+            self.create_data_win_items()
+
+    def cleanup_aliases(self):
+        if self.dpg.does_alias_exist(configs.SETTINGS_DATA_WINDOW_ID):
+            self.dpg.remove_alias(configs.SETTINGS_DATA_WINDOW_ID)
+
+        if self.dpg.does_alias_exist(configs.SETTINGS_DATA_WINDOW_MINS_FIELD_ID):
+            self.dpg.remove_alias(configs.SETTINGS_DATA_WINDOW_MINS_FIELD_ID)
+
+        if self.dpg.does_alias_exist(configs.SETTINGS_DATA_WINDOW_POMODOROS_FIELD_ID):
+            self.dpg.remove_alias(configs.SETTINGS_DATA_WINDOW_POMODOROS_FIELD_ID)
+
+        if self.dpg.does_alias_exist(configs.SETTINGS_DATA_WINDOW_CLOSE_BTN_ID):
+            self.dpg.remove_alias(configs.SETTINGS_DATA_WINDOW_CLOSE_BTN_ID)
+
+    def create_data_win_items(self):
+        # read from file if it exists
+        focus_mins = 0
+        pomodoros = 0
+        if exists(configs.USERDATA_FILEPATH):
+            data_file = open(configs.USERDATA_FILEPATH)
+            data = json.load(data_file)
+
+            focus_mins = data[configs.USERDATA_TOTAL_FOCUS_MINS]
+            pomodoros = data[configs.USERDATA_TOTAL_POMODOROS]
+
+            data_file.close()
+
+        # number of mins focused
+        self.dpg.add_text(configs.SETTINGS_DATA_WINDOW_MINS_FIELD_LABEL)
+        with self.dpg.group(horizontal=True):
+            self.dpg.add_spacer(width=configs.SETTINGS_DATA_WINDOW_MINS_FIELD_SPACER[0])
+            self.dpg.add_input_text(tag=configs.SETTINGS_DATA_WINDOW_MINS_FIELD_ID,
+                                    default_value=focus_mins,
+                                    enabled=False)
+
+        # number of pomodoros so far
+        self.dpg.add_text(configs.SETTINGS_DATA_WINDOW_POMODOROS_FIELD_LABEL)
+        with self.dpg.group(horizontal=True):
+            self.dpg.add_spacer(width=configs.SETTINGS_DATA_WINDOW_POMODOROS_FIELD_SPACER[0])
+            self.dpg.add_input_text(tag=configs.SETTINGS_DATA_WINDOW_POMODOROS_FIELD_ID,
+                                    default_value=pomodoros,
+                                    enabled=False)
+
+        # close button
+        with self.dpg.group(horizontal=True):
+            self.dpg.add_spacer(width=configs.SETTINGS_DATA_WINDOW_CLOSE_BTN_SPACER[0])
+            self.dpg.add_button(tag=configs.SETTINGS_DATA_WINDOW_CLOSE_BTN_ID,
+                                label=configs.SETTINGS_DATA_WINDOW_CLOSE_BTN_LABEL,
+                                callback=self.close_data_win_callback)
+
+    def close_data_win_callback(self):
+        self.dpg.delete_item(configs.SETTINGS_DATA_WINDOW_ID)
+        self.cleanup_aliases()
 
     def create_configuration_items(self):
         # combo focus timer
@@ -118,14 +198,19 @@ class PomodoroSettings:
         self.dpg.hide_item(configs.SETTINGS_WINDOW_ID)
 
         # save setting configurations
-        settings_file = open(configs.SETTINGS_FILENAME, 'w')
-        settings_file.write(str(self.get_focus_time()) + '\n' +
-                            str(self.get_small_break()) + '\n' +
-                            str(self.get_long_break()))
-        settings_file.close()
+        self.save_settings()
 
         # loads the pomodoro timer gui
         PomodoroTimer(self.dpg, self)
+
+    def save_settings(self):
+        data_file = open(configs.USERDATA_FILEPATH)
+        user_data = json.load(data_file)
+        user_data[configs.USERDATA_FOCUS_MINS] = self.get_focus_time()
+        user_data[configs.USERDATA_SMALLBREAK_MINS] = self.get_small_break()
+        user_data[configs.USERDATA_LONGBREAK_MINS] = self.get_long_break()
+
+        data_file.close()
 
     def get_focus_time(self):
         return int(self.dpg.get_value(configs.SETTINGS_FOCUS_COMBO_ID))

@@ -1,8 +1,11 @@
 import threading
 import configs
+import json
+from datetime import date
 from timer import Timer
 from playsound import playsound
 from tools import Tools
+from os.path import exists
 
 
 # Description: this class handles the display of the timer to the user (how much mins and secs are left)
@@ -11,7 +14,15 @@ class PomodoroTimer:
     def __init__(self, dpg, settings):
         self.dpg = dpg
         self.settings = settings
-        self.local_pomodoro_counter = 0
+
+        user_data = open(configs.USERDATA_FILEPATH)
+        data = json.load(user_data)
+
+        try:
+            self.local_pomodoro_counter = data[configs.USERDATA_DATE][Tools.get_current_day()]
+        except KeyError:
+            data[configs.USERDATA_DATE][Tools.get_current_day()] = 0
+            self.local_pomodoro_counter = data[configs.USERDATA_DATE][Tools.get_current_day()]
 
         # creates the timer thread
         self.timer = Timer(self.settings.get_focus_time())
@@ -112,10 +123,12 @@ class PomodoroTimer:
 
         # only add to counter if the timer finishes (not when the user presses stop or restart)
         if self.timer.get_min_value() <= 0 and self.timer.get_sec_value() <= 0:
-
             # only update counter if it was a focus session
             if self.timer.isFocus:
                 self.update_pomodoro_counters()
+
+                # update user data
+                self.update_data_file()
 
             self.create_finished_dialog()
 
@@ -139,19 +152,18 @@ class PomodoroTimer:
 
             if self.dpg.does_alias_exist(configs.POMODORO_LONG_BREAK_BTN_ID):
                 self.dpg.remove_alias(configs.POMODORO_LONG_BREAK_BTN_ID)
-                self.restart_threads()
+            self.restart_threads()
 
     def update_min_and_sec(self):
         while not self.timer.timer_stop:
+            # prevents thread from continuing
             if not self.dpg.is_dearpygui_running():
                 break
-
-            # if not self.dpg.is_dearpygui_running() or (self.timer.get_min_value() <= 0 and self.timer.get_sec_value() <= 0):
-            #     break
 
             self.dpg.set_value(configs.POMODORO_MIN_FIELD_ID, self.timer.get_min_value())
             self.dpg.set_value(configs.POMODORO_SEC_FIELD_ID, self.timer.get_sec_value())
 
+            # todo easy fix as the gui is behind timer by one second
             if self.timer.get_min_value() <= 0 and self.timer.get_sec_value() <= 0:
                 self.dpg.set_value(configs.POMODORO_SEC_FIELD_ID, 0)
                 break
@@ -162,6 +174,29 @@ class PomodoroTimer:
 
             # todo this is currently a workaround and could be fixed in the next update
             self.remove_aliases()
+
+    def update_data_file(self):
+        # retrieve current min and num of pomodoros
+        if exists(configs.DATA_FILEPATH):
+            data_file = open(configs.DATA_FILEPATH, 'r')
+            focus_mins = int(data_file.readline())
+            pomodoros = int(data_file.readline())
+
+            # update the values
+            focus_mins += self.settings.get_focus_time()
+            pomodoros += 1
+        else:  # create the file
+            data_file = open(configs.DATA_FILEPATH, 'x')
+
+            # update the values
+            focus_mins = self.settings.get_focus_time()
+            pomodoros = 1
+
+        data_file.close()
+
+        # overwrite into file
+        data_file = open(configs.DATA_FILEPATH, 'w')
+        data_file.write(str(focus_mins) + '\n' + str(pomodoros))
 
     def remove_aliases(self):
         # displays
@@ -263,7 +298,6 @@ class PomodoroTimer:
     def longbreak_callback(self):
         self.event.set()
 
-        self.local_pomodoro_counter = 0
         self.timer.isOnLongBreak = True
         self.timer.isFocus = False
         self.timer.isOnSmallBreak = False

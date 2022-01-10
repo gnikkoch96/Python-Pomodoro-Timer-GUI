@@ -5,8 +5,8 @@ from pomodoro_settings import PomodoroSettings
 
 def create_windows():
     dpg.create_context()
-    dpg.create_viewport(title=configs.VIEWPORT_TITLE, 
-                        width=configs.VIEWPORT_WIDTH, 
+    dpg.create_viewport(title=configs.VIEWPORT_TITLE,
+                        width=configs.VIEWPORT_WIDTH,
                         height=configs.VIEWPORT_HEIGHT)
     dpg.setup_dearpygui()
     dpg.set_global_font_scale(configs.DPG_FONT_SCALE)
@@ -53,7 +53,19 @@ def create_dpg_themes():
             dpg.add_theme_style(dpg.mvStyleVar_ChildBorderSize, 0)
             dpg.add_theme_style(dpg.mvStyleVar_FrameRounding, 6)
 
-    dpg.bind_theme(configs.DEFAULT_THEME_ID)
+    with dpg.theme(tag=configs.POPUP_THEME_ID):
+        with dpg.theme_component(dpg.mvAll):
+            dpg.add_theme_color(dpg.mvThemeCol_PopupBg, (196, 45, 45),
+                                category=dpg.mvThemeCat_Core)
+            dpg.add_theme_color(dpg.mvThemeCol_TitleBgActive, (38, 177, 181),
+                                category=dpg.mvThemeCat_Core)
+            dpg.add_theme_style(dpg.mvStyleVar_WindowPadding, 20, 0,
+                                category=dpg.mvThemeCat_Core)
+            dpg.add_theme_color(dpg.mvThemeCol_Button, (65, 157, 161),
+                                category=dpg.mvThemeCat_Core)
+            dpg.add_theme_color(dpg.mvThemeCol_ScrollbarGrab, (65, 157, 161),
+                                category=dpg.mvThemeCat_Core)
+            dpg.add_theme_style(dpg.mvStyleVar_FrameRounding, 6)
 
 
 if __name__ == '__main__':

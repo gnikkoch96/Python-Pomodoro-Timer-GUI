@@ -27,10 +27,26 @@ class Tools:
         current_date = f"{date.today().month}/{date.today().day}/{date.today().year}"
         data[configs.USERDATA_DATE][current_date] = 0
 
-        with open(configs.USERDATA_FILEPATH, 'w') as outfile:
-            json.dump(data, outfile)
+        Tools.update_user_data(data)
+
+    @staticmethod
+    def update_user_data(new_data):
+        with open(configs.USERDATA_FILEPATH, 'w') as json_file:
+            json.dump(new_data, json_file)
 
     @staticmethod
     def get_current_day():
         current_date = f"{date.today().month}/{date.today().day}/{date.today().year}"
         return current_date
+
+    @staticmethod
+    # generates the list of mins that user can choose from
+    def create_time_list():
+        time_list = []
+
+        # user has the option to choose between 1 min to 60 mins
+        # todo change 0 back to 1
+        for i in range(0, 61):
+            time_list.append(i)
+
+        return time_list

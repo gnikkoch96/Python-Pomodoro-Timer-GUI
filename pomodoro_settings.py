@@ -10,7 +10,7 @@ from os.path import exists
 class PomodoroSettings:
     def __init__(self, dpg):
         self.dpg = dpg
-        self.list_time = PomodoroSettings.create_time_list()
+        self.list_time = Tools.create_time_list()
         self.default_time = [configs.SETTINGS_FOCUS_COMBO_DEFAULT_VALUE,
                              configs.SETTINGS_SMALL_BREAK_COMBO_DEFAULT_VALUE,
                              configs.SETTINGS_LONG_BREAK_COMBO_DEFAULT_VALUE]
@@ -29,18 +29,6 @@ class PomodoroSettings:
             Tools.create_default_user_data()
 
         self.create_pomodoro_settings_window()
-
-
-    @staticmethod
-    # generates the list of mins that user can choose from
-    def create_time_list():
-        time_list = []
-
-        # user has the option to choose between 1 min to 60 mins
-        for i in range(1, 61):
-            time_list.append(i)
-
-        return time_list
 
     def create_pomodoro_settings_window(self):
         with self.dpg.window(tag=configs.SETTINGS_WINDOW_ID,
@@ -93,6 +81,7 @@ class PomodoroSettings:
                              on_close=self.cleanup_aliases,
                              no_resize=True,
                              modal=True):
+            self.dpg.bind_item_theme(configs.SETTINGS_DATA_WINDOW_ID, configs.POPUP_THEME_ID)
             self.create_data_win_items()
 
     def cleanup_aliases(self):
@@ -110,8 +99,6 @@ class PomodoroSettings:
 
     def create_data_win_items(self):
         # read from file if it exists
-        focus_mins = 0
-        pomodoros = 0
         if exists(configs.USERDATA_FILEPATH):
             data_file = open(configs.USERDATA_FILEPATH)
             data = json.load(data_file)
@@ -120,24 +107,36 @@ class PomodoroSettings:
             pomodoros = data[configs.USERDATA_TOTAL_POMODOROS]
 
             data_file.close()
+        else:
+            focus_mins = 0
+            pomodoros = 0
 
         # number of mins focused
-        self.dpg.add_text(configs.SETTINGS_DATA_WINDOW_MINS_FIELD_LABEL)
-        with self.dpg.group(horizontal=True):
+        self.dpg.add_spacer(height=configs.SETTINGS_DATA_WINDOW_MINS_FIELD_SPACER[1])
+        with self.dpg.group(horizontal=True):  # label
+            self.dpg.add_spacer(width=configs.SETTINGS_DATA_WINDOW_MINS_FIELD_SPACER[0])
+            self.dpg.add_text(configs.SETTINGS_DATA_WINDOW_MINS_FIELD_LABEL)
+
+        with self.dpg.group(horizontal=True):  # input field
             self.dpg.add_spacer(width=configs.SETTINGS_DATA_WINDOW_MINS_FIELD_SPACER[0])
             self.dpg.add_input_text(tag=configs.SETTINGS_DATA_WINDOW_MINS_FIELD_ID,
                                     default_value=focus_mins,
                                     enabled=False)
 
         # number of pomodoros so far
-        self.dpg.add_text(configs.SETTINGS_DATA_WINDOW_POMODOROS_FIELD_LABEL)
-        with self.dpg.group(horizontal=True):
+        self.dpg.add_spacer(height=configs.SETTINGS_DATA_WINDOW_POMODOROS_FIELD_SPACER[1])
+        with self.dpg.group(horizontal=True):  # label
+            self.dpg.add_spacer(width=configs.SETTINGS_DATA_WINDOW_POMODOROS_FIELD_SPACER[0])
+            self.dpg.add_text(configs.SETTINGS_DATA_WINDOW_POMODOROS_FIELD_LABEL)
+
+        with self.dpg.group(horizontal=True):  # input field
             self.dpg.add_spacer(width=configs.SETTINGS_DATA_WINDOW_POMODOROS_FIELD_SPACER[0])
             self.dpg.add_input_text(tag=configs.SETTINGS_DATA_WINDOW_POMODOROS_FIELD_ID,
                                     default_value=pomodoros,
                                     enabled=False)
 
         # close button
+        self.dpg.add_spacer(height=configs.SETTINGS_DATA_WINDOW_CLOSE_BTN_SPACER[1])
         with self.dpg.group(horizontal=True):
             self.dpg.add_spacer(width=configs.SETTINGS_DATA_WINDOW_CLOSE_BTN_SPACER[0])
             self.dpg.add_button(tag=configs.SETTINGS_DATA_WINDOW_CLOSE_BTN_ID,
@@ -206,9 +205,14 @@ class PomodoroSettings:
     def save_settings(self):
         data_file = open(configs.USERDATA_FILEPATH)
         user_data = json.load(data_file)
+
+        # update the values
         user_data[configs.USERDATA_FOCUS_MINS] = self.get_focus_time()
         user_data[configs.USERDATA_SMALLBREAK_MINS] = self.get_small_break()
         user_data[configs.USERDATA_LONGBREAK_MINS] = self.get_long_break()
+
+        # update json file
+        Tools.update_user_data(user_data)
 
         data_file.close()
 

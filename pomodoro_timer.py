@@ -1,7 +1,6 @@
 import threading
 import configs
 import json
-from datetime import date
 from timer import Timer
 from playsound import playsound
 from tools import Tools
@@ -15,6 +14,7 @@ class PomodoroTimer:
         self.dpg = dpg
         self.settings = settings
 
+        # retrieve current day pomodoros (or create one)
         user_data = open(configs.USERDATA_FILEPATH)
         data = json.load(user_data)
 
@@ -23,6 +23,9 @@ class PomodoroTimer:
         except KeyError:
             data[configs.USERDATA_DATE][Tools.get_current_day()] = 0
             self.local_pomodoro_counter = data[configs.USERDATA_DATE][Tools.get_current_day()]
+
+        # update json file
+        Tools.update_user_data(data)
 
         # creates the timer thread
         self.timer = Timer(self.settings.get_focus_time())
@@ -89,7 +92,7 @@ class PomodoroTimer:
             self.dpg.add_input_text(label=configs.POMODORO_COUNTER_FIELD_LABEL,
                                     tag=configs.POMODORO_COUNTER_FIELD_ID,
                                     width=configs.POMODORO_COUNTER_FIELD_WIDTH,
-                                    default_value=0)
+                                    default_value=self.local_pomodoro_counter)
             self.dpg.configure_item(configs.POMODORO_COUNTER_FIELD_ID, enabled=False)
 
     def create_buttons(self):
@@ -140,19 +143,21 @@ class PomodoroTimer:
             self.event.clear()
             self.dpg.delete_item(configs.POMODORO_FINISHED_WINDOW_ID)
 
-            # todo remove when patched
-            if self.dpg.does_alias_exist(configs.POMODORO_FINISHED_WINDOW_ID):
-                self.dpg.remove_alias(configs.POMODORO_FINISHED_WINDOW_ID)
-
-            if self.dpg.does_alias_exist(configs.POMODORO_FOCUS_BTN_ID):
-                self.dpg.remove_alias(configs.POMODORO_FOCUS_BTN_ID)
-
-            if self.dpg.does_alias_exist(configs.POMODORO_SMALL_BREAK_BTN_ID):
-                self.dpg.remove_alias(configs.POMODORO_SMALL_BREAK_BTN_ID)
-
-            if self.dpg.does_alias_exist(configs.POMODORO_LONG_BREAK_BTN_ID):
-                self.dpg.remove_alias(configs.POMODORO_LONG_BREAK_BTN_ID)
+            self.cleanup_finished_win_aliases()
             self.restart_threads()
+
+    def cleanup_finished_win_aliases(self):
+        if self.dpg.does_alias_exist(configs.POMODORO_FINISHED_WINDOW_ID):
+            self.dpg.remove_alias(configs.POMODORO_FINISHED_WINDOW_ID)
+
+        if self.dpg.does_alias_exist(configs.POMODORO_FOCUS_BTN_ID):
+            self.dpg.remove_alias(configs.POMODORO_FOCUS_BTN_ID)
+
+        if self.dpg.does_alias_exist(configs.POMODORO_SMALL_BREAK_BTN_ID):
+            self.dpg.remove_alias(configs.POMODORO_SMALL_BREAK_BTN_ID)
+
+        if self.dpg.does_alias_exist(configs.POMODORO_LONG_BREAK_BTN_ID):
+            self.dpg.remove_alias(configs.POMODORO_LONG_BREAK_BTN_ID)
 
     def update_min_and_sec(self):
         while not self.timer.timer_stop:
@@ -177,26 +182,18 @@ class PomodoroTimer:
 
     def update_data_file(self):
         # retrieve current min and num of pomodoros
-        if exists(configs.DATA_FILEPATH):
-            data_file = open(configs.DATA_FILEPATH, 'r')
-            focus_mins = int(data_file.readline())
-            pomodoros = int(data_file.readline())
+        if exists(configs.USERDATA_FILEPATH):
+            data_file = open(configs.USERDATA_FILEPATH)
+            data = json.load(data_file)
 
             # update the values
-            focus_mins += self.settings.get_focus_time()
-            pomodoros += 1
-        else:  # create the file
-            data_file = open(configs.DATA_FILEPATH, 'x')
+            data[configs.USERDATA_TOTAL_FOCUS_MINS] += self.settings.get_focus_time()
+            data[configs.USERDATA_TOTAL_POMODOROS] += 1
 
-            # update the values
-            focus_mins = self.settings.get_focus_time()
-            pomodoros = 1
+            data_file.close()
 
-        data_file.close()
-
-        # overwrite into file
-        data_file = open(configs.DATA_FILEPATH, 'w')
-        data_file.write(str(focus_mins) + '\n' + str(pomodoros))
+            # update json file
+            Tools.update_user_data(data)
 
     def remove_aliases(self):
         # displays
@@ -238,6 +235,14 @@ class PomodoroTimer:
     def update_pomodoro_counters(self):
         pomodoro_counter = int(self.dpg.get_value(configs.POMODORO_COUNTER_FIELD_ID)) + 1
         self.local_pomodoro_counter = pomodoro_counter
+
+        # update json
+        user_data = open(configs.USERDATA_FILEPATH)
+        data = json.load(user_data)
+        data[configs.USERDATA_DATE][Tools.get_current_day()] = self.local_pomodoro_counter
+        Tools.update_user_data(data)
+        user_data.close()
+
         self.dpg.set_value(configs.POMODORO_COUNTER_FIELD_ID, str(pomodoro_counter))
 
     # restarts the timer and the gui threads
@@ -255,12 +260,14 @@ class PomodoroTimer:
 
     def create_finished_dialog(self):
         with self.dpg.window(tag=configs.POMODORO_FINISHED_WINDOW_ID,
-                             on_close=self.focus_callback,
                              width=configs.POMODORO_FINISHED_WINDOW_DIMENSIONS[0],
                              height=configs.POMODORO_FINISHED_WINDOW_DIMENSIONS[1],
                              pos=configs.POMODORO_FINISHED_WINDOW_POS,
+                             no_title_bar=True,
                              modal=True,
                              show=True):
+            self.dpg.bind_item_theme(configs.POMODORO_FINISHED_WINDOW_ID, configs.POPUP_THEME_ID)
+
             # finished image
             with self.dpg.group(horizontal=True):
                 self.dpg.add_spacer(width=configs.POMODORO_FINISHED_IMG_SPACER[0])

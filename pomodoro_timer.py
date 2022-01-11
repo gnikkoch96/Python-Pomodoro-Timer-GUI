@@ -10,22 +10,20 @@ from os.path import exists
 # Description: this class handles the display of the timer to the user (how much mins and secs are left)
 class PomodoroTimer:
 
-    def __init__(self, dpg, settings):
+    def __init__(self, dpg, settings, user_data):
         self.dpg = dpg
+        self.user_data = user_data
         self.settings = settings
 
-        # retrieve current day pomodoros (or create one)
-        user_data = open(configs.USERDATA_FILEPATH)
-        data = json.load(user_data)
-
+        # retrieves the current day's num of pomodoros
         try:
-            self.local_pomodoro_counter = data[configs.USERDATA_DATE][Tools.get_current_day()]
+            self.local_pomodoro_counter = self.user_data[configs.USERDATA_DATE][Tools.get_current_day()]
         except KeyError:
-            data[configs.USERDATA_DATE][Tools.get_current_day()] = 0
-            self.local_pomodoro_counter = data[configs.USERDATA_DATE][Tools.get_current_day()]
+            self.user_data[configs.USERDATA_DATE][Tools.get_current_day()] = 0
+            self.local_pomodoro_counter = self.user_data[configs.USERDATA_DATE][Tools.get_current_day()]
 
         # update json file
-        Tools.update_user_data(data)
+        Tools.update_user_data(self.user_data)
 
         # creates the timer thread
         self.timer = Timer(self.settings.get_focus_time())
@@ -181,19 +179,12 @@ class PomodoroTimer:
             self.remove_aliases()
 
     def update_data_file(self):
-        # retrieve current min and num of pomodoros
-        if exists(configs.USERDATA_FILEPATH):
-            data_file = open(configs.USERDATA_FILEPATH)
-            data = json.load(data_file)
+        # update the values
+        self.user_data[configs.USERDATA_TOTAL_FOCUS_MINS] += self.settings.get_focus_time()
+        self.user_data[configs.USERDATA_TOTAL_POMODOROS] += 1
 
-            # update the values
-            data[configs.USERDATA_TOTAL_FOCUS_MINS] += self.settings.get_focus_time()
-            data[configs.USERDATA_TOTAL_POMODOROS] += 1
-
-            data_file.close()
-
-            # update json file
-            Tools.update_user_data(data)
+        # update json file
+        Tools.update_user_data(self.user_data)
 
     def remove_aliases(self):
         # displays
@@ -237,11 +228,8 @@ class PomodoroTimer:
         self.local_pomodoro_counter = pomodoro_counter
 
         # update json
-        user_data = open(configs.USERDATA_FILEPATH)
-        data = json.load(user_data)
-        data[configs.USERDATA_DATE][Tools.get_current_day()] = self.local_pomodoro_counter
-        Tools.update_user_data(data)
-        user_data.close()
+        self.user_data[configs.USERDATA_DATE][Tools.get_current_day()] = self.local_pomodoro_counter
+        Tools.update_user_data(self.user_data)
 
         self.dpg.set_value(configs.POMODORO_COUNTER_FIELD_ID, str(pomodoro_counter))
 

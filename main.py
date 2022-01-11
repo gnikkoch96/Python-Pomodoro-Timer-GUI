@@ -1,6 +1,10 @@
+import json
+
 import dearpygui.dearpygui as dpg
 import configs
+from tools import Tools
 from pomodoro_settings import PomodoroSettings
+from os.path import exists
 
 
 def create_windows():
@@ -18,7 +22,15 @@ def create_windows():
     create_dpg_themes()
 
     # start pomodoro settings window
-    PomodoroSettings(dpg)
+    if not exists(configs.USERDATA_FILEPATH):
+        Tools.create_default_user_data()
+
+    # create reference to user data json file
+    user_data_file = open(configs.USERDATA_FILEPATH)
+    user_data = json.load(user_data_file)
+    user_data_file.close()
+
+    PomodoroSettings(dpg, user_data)
 
     dpg.show_viewport()
     dpg.start_dearpygui()
@@ -53,6 +65,7 @@ def create_dpg_themes():
             dpg.add_theme_style(dpg.mvStyleVar_ChildBorderSize, 0)
             dpg.add_theme_style(dpg.mvStyleVar_FrameRounding, 6)
 
+    # popup theme
     with dpg.theme(tag=configs.POPUP_THEME_ID):
         with dpg.theme_component(dpg.mvAll):
             dpg.add_theme_color(dpg.mvThemeCol_PopupBg, (196, 45, 45),

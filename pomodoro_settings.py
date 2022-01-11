@@ -8,25 +8,14 @@ from os.path import exists
 # Description: this class creates the GUI for the pomodoro settings
 # where the user can select their focus timer, small break timer, and long break time
 class PomodoroSettings:
-    def __init__(self, dpg):
+    def __init__(self, dpg, user_data):
         self.dpg = dpg
+
+        # json format of the user's configurations
+        self.user_data = user_data
+
+        # used for the combos
         self.list_time = Tools.create_time_list()
-        self.default_time = [configs.SETTINGS_FOCUS_COMBO_DEFAULT_VALUE,
-                             configs.SETTINGS_SMALL_BREAK_COMBO_DEFAULT_VALUE,
-                             configs.SETTINGS_LONG_BREAK_COMBO_DEFAULT_VALUE]
-
-        # check if settings file exists
-        if exists(configs.USERDATA_FILEPATH):
-            user_data = open(configs.USERDATA_FILEPATH)
-            data = json.load(user_data)
-
-            self.default_time[0] = data[configs.USERDATA_FOCUS_MINS]
-            self.default_time[1] = data[configs.USERDATA_SMALLBREAK_MINS]
-            self.default_time[2] = data[configs.USERDATA_LONGBREAK_MINS]
-
-            user_data.close()
-        else:
-            Tools.create_default_user_data()
 
         self.create_pomodoro_settings_window()
 
@@ -37,7 +26,6 @@ class PomodoroSettings:
                              no_resize=True) as config_window:
             self.dpg.set_primary_window(configs.SETTINGS_WINDOW_ID, True)
 
-            # todo might need to remove this as I wanted to make this the global theme
             # load theme
             self.dpg.bind_item_theme(config_window, configs.DEFAULT_THEME_ID)
 
@@ -98,20 +86,7 @@ class PomodoroSettings:
             self.dpg.remove_alias(configs.SETTINGS_DATA_WINDOW_CLOSE_BTN_ID)
 
     def create_data_win_items(self):
-        # read from file if it exists
-        if exists(configs.USERDATA_FILEPATH):
-            data_file = open(configs.USERDATA_FILEPATH)
-            data = json.load(data_file)
-
-            focus_mins = data[configs.USERDATA_TOTAL_FOCUS_MINS]
-            pomodoros = data[configs.USERDATA_TOTAL_POMODOROS]
-
-            data_file.close()
-        else:
-            focus_mins = 0
-            pomodoros = 0
-
-        # number of mins focused
+        # total of mins focused
         self.dpg.add_spacer(height=configs.SETTINGS_DATA_WINDOW_MINS_FIELD_SPACER[1])
         with self.dpg.group(horizontal=True):  # label
             self.dpg.add_spacer(width=configs.SETTINGS_DATA_WINDOW_MINS_FIELD_SPACER[0])
@@ -120,10 +95,10 @@ class PomodoroSettings:
         with self.dpg.group(horizontal=True):  # input field
             self.dpg.add_spacer(width=configs.SETTINGS_DATA_WINDOW_MINS_FIELD_SPACER[0])
             self.dpg.add_input_text(tag=configs.SETTINGS_DATA_WINDOW_MINS_FIELD_ID,
-                                    default_value=focus_mins,
+                                    default_value=self.user_data[configs.USERDATA_TOTAL_FOCUS_MINS],
                                     enabled=False)
 
-        # number of pomodoros so far
+        # total of pomodoros
         self.dpg.add_spacer(height=configs.SETTINGS_DATA_WINDOW_POMODOROS_FIELD_SPACER[1])
         with self.dpg.group(horizontal=True):  # label
             self.dpg.add_spacer(width=configs.SETTINGS_DATA_WINDOW_POMODOROS_FIELD_SPACER[0])
@@ -132,7 +107,7 @@ class PomodoroSettings:
         with self.dpg.group(horizontal=True):  # input field
             self.dpg.add_spacer(width=configs.SETTINGS_DATA_WINDOW_POMODOROS_FIELD_SPACER[0])
             self.dpg.add_input_text(tag=configs.SETTINGS_DATA_WINDOW_POMODOROS_FIELD_ID,
-                                    default_value=pomodoros,
+                                    default_value=self.user_data[configs.USERDATA_TOTAL_POMODOROS],
                                     enabled=False)
 
         # close button
@@ -152,21 +127,21 @@ class PomodoroSettings:
         self.dpg.add_combo(tag=configs.SETTINGS_FOCUS_COMBO_ID,
                            items=self.list_time,
                            width=configs.SETTINGS_COMBO_WIDTH,
-                           default_value=self.default_time[0])
+                           default_value=self.user_data[configs.USERDATA_FOCUS_MINS])
         self.dpg.add_spacer(height=configs.SETTINGS_COMBO_HEIGHT_PADDING)
 
         # combo for small break
         self.dpg.add_combo(tag=configs.SETTINGS_SMALL_BREAK_COMBO_ID,
                            items=self.list_time,
                            width=configs.SETTINGS_COMBO_WIDTH,
-                           default_value=self.default_time[1])
+                           default_value=self.user_data[configs.USERDATA_SMALLBREAK_MINS])
         self.dpg.add_spacer(height=configs.SETTINGS_COMBO_HEIGHT_PADDING)
 
         # combo for long break
         self.dpg.add_combo(tag=configs.SETTINGS_LONG_BREAK_COMBO_ID,
                            items=self.list_time,
                            width=configs.SETTINGS_COMBO_WIDTH,
-                           default_value=self.default_time[2])
+                           default_value=self.user_data[configs.USERDATA_LONGBREAK_MINS])
         self.dpg.add_spacer(height=configs.SETTINGS_COMBO_HEIGHT_PADDING)
 
         # start button
@@ -200,21 +175,16 @@ class PomodoroSettings:
         self.save_settings()
 
         # loads the pomodoro timer gui
-        PomodoroTimer(self.dpg, self)
+        PomodoroTimer(self.dpg, self, self.user_data)
 
     def save_settings(self):
-        data_file = open(configs.USERDATA_FILEPATH)
-        user_data = json.load(data_file)
-
         # update the values
-        user_data[configs.USERDATA_FOCUS_MINS] = self.get_focus_time()
-        user_data[configs.USERDATA_SMALLBREAK_MINS] = self.get_small_break()
-        user_data[configs.USERDATA_LONGBREAK_MINS] = self.get_long_break()
+        self.user_data[configs.USERDATA_FOCUS_MINS] = self.get_focus_time()
+        self.user_data[configs.USERDATA_SMALLBREAK_MINS] = self.get_small_break()
+        self.user_data[configs.USERDATA_LONGBREAK_MINS] = self.get_long_break()
 
         # update json file
-        Tools.update_user_data(user_data)
-
-        data_file.close()
+        Tools.update_user_data(self.user_data)
 
     def get_focus_time(self):
         return int(self.dpg.get_value(configs.SETTINGS_FOCUS_COMBO_ID))

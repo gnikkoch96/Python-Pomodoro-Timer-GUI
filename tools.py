@@ -1,4 +1,3 @@
-# so far we can only add padding and add and load images
 import configs
 import json
 from datetime import date
@@ -6,6 +5,7 @@ from datetime import date
 
 class Tools:
     @staticmethod
+    # renders an image to be displayed on the dearpygui
     def add_and_load_image(dpg, image_path, parent=None):
         width, height, channels, data = dpg.load_image(image_path)
 
@@ -18,6 +18,7 @@ class Tools:
             return dpg.add_image(texture_id, parent=parent)
 
     @staticmethod
+    # creates the user_data.json file with default configurations
     def create_default_user_data():
         data = {configs.USERDATA_FOCUS_MINS: 15, configs.USERDATA_SMALLBREAK_MINS: 2,
                 configs.USERDATA_LONGBREAK_MINS: 25, configs.USERDATA_DATE: {}, configs.USERDATA_TOTAL_FOCUS_MINS: 0,
@@ -30,6 +31,7 @@ class Tools:
         Tools.update_user_data(data)
 
     @staticmethod
+    # updates the json file
     def update_user_data(new_data):
         with open(configs.USERDATA_FILEPATH, 'w') as json_file:
             json.dump(new_data, json_file)
@@ -45,8 +47,7 @@ class Tools:
         time_list = []
 
         # user has the option to choose between 1 min to 60 mins
-        # todo change 0 back to 1
-        for i in range(0, 61):
+        for i in range(1, 61):
             time_list.append(i)
 
         return time_list

@@ -21,8 +21,8 @@
   <ul>
     <li> <i> PyCharm IDE </i> - The environment used to code in Python </li>
     <li> <i> DearPyGUI Framework v1.0.2 </i> - Framework used to create the GUI for this project </li>
-    <li> <i> Playsound Module </i> - Imported the playsound module so that I could alert the user that their session was done </li>
-    <li> <i> Python 3.9 </i> </li>
+    <li> <i> Playsound Module v1.2.2 </i> - Imported the playsound module so that I could alert the user that their session was done </li>
+    <li> <i> Python 3.8 </i> </li>
   </ul>
 
 <!--Demonstration + How to Use-->

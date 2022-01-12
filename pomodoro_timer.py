@@ -1,10 +1,8 @@
 import threading
 import configs
-import json
 from timer import Timer
 from playsound import playsound
 from tools import Tools
-from os.path import exists
 
 
 # Description: this class handles the display of the timer to the user (how much mins and secs are left)
@@ -136,6 +134,11 @@ class PomodoroTimer:
             # change the sound here (block allows the program to continue w/o waiting for sound to finish)
             playsound(configs.SOUND_PATH)
 
+            # display toast
+            threading.Thread(target=Tools.display_notif, daemon=True, args=(configs.TOAST_TITLE,
+                                                                            configs.TOAST_MESSAGE,
+                                                                            configs.TOAST_DURATION)).start()
+
             # pomodoro_timer gui waits for user to press a button or close dialog
             self.event.wait()
             self.event.clear()
@@ -252,6 +255,7 @@ class PomodoroTimer:
                              height=configs.POMODORO_FINISHED_WINDOW_DIMENSIONS[1],
                              pos=configs.POMODORO_FINISHED_WINDOW_POS,
                              no_title_bar=True,
+                             no_move=True,
                              modal=True,
                              show=True):
             self.dpg.bind_item_theme(configs.POMODORO_FINISHED_WINDOW_ID, configs.POPUP_THEME_ID)

@@ -2,6 +2,10 @@ import configs
 import json
 from datetime import date
 
+try:
+    from win10toast import ToastNotifier
+except ImportError:
+    print(configs.TOAST_ERROR_MSG)
 
 class Tools:
     @staticmethod
@@ -51,3 +55,13 @@ class Tools:
             time_list.append(i)
 
         return time_list
+
+    @staticmethod
+    def display_notif(title, message, dur):
+        toast = ToastNotifier()
+
+        # display toast notification showing that timer is done (win 10 only)
+        try:
+            toast.show_toast(title, message, duration=dur)
+        except:
+            print(configs.TOAST_ERROR_MSG)

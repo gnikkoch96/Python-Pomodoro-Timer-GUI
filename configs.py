@@ -66,6 +66,10 @@ USERDATA_TOTAL_POMODOROS = "total_poms"
 USERDATA_DATE = 'date'
 
 # main
+TOAST_ERROR_MSG = "Notifications work for win 10 only"
+TOAST_TITLE = "Pomodoro Timer"
+TOAST_MESSAGE = "Pomodoro Session Completed!"
+TOAST_DURATION = 5
 VIEWPORT_TITLE = "Nikko's Pomodoro Timer"
 DPG_FONT_SCALE = 1.25
 

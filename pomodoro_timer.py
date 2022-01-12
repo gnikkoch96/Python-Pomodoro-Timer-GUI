@@ -13,6 +13,15 @@ class PomodoroTimer:
         self.user_data = user_data
         self.settings = settings
 
+        # todo cleanup used to change img indicator of the current activity (focus or small break)
+        self.study_img = None
+        self.relax_img = None
+
+        # initially the timer will be set to focus
+        self.isFocus = True
+        self.isOnSmallBreak = False
+        self.isOnLongBreak = False
+
         # retrieves the current day's num of pomodoros
         try:
             self.local_pomodoro_counter = self.user_data[configs.USERDATA_DATE][Tools.get_current_day()]
@@ -38,17 +47,21 @@ class PomodoroTimer:
                              height=self.dpg.get_viewport_height(),
                              width=self.dpg.get_viewport_width()) as timer_window:
             # todo cleanup
-            # binds theme
             self.dpg.bind_item_theme(timer_window, configs.DEFAULT_THEME_ID)
             self.dpg.set_primary_window(timer_window, True)
             self.create_pomodoro_timer_gui_items()
 
     def create_pomodoro_timer_gui_items(self):
         # student studying image
-        # todo might change this to a dynamic image
-        with self.dpg.group(horizontal=True) as study_img:
+        with self.dpg.group(horizontal=True) as self.study_img:
             self.dpg.add_spacer(width=configs.POMODORO_STUDY_IMG_SPACER[0])
-            Tools.add_and_load_image(self.dpg, configs.STUDYING_IMAGE_PATH, study_img)
+            Tools.add_and_load_image(self.dpg, configs.STUDYING_IMAGE_PATH, self.study_img)
+
+        # person relaxing image
+        with self.dpg.group(horizontal=True) as self.relax_img:
+            self.dpg.add_spacer(width=configs.POMODORO_STUDY_IMG_SPACER[0])
+            Tools.add_and_load_image(self.dpg, configs.RELAXING_IMAGE_PATH, self.relax_img)
+        self.dpg.hide_item(self.relax_img)
 
         self.dpg.add_spacer(height=configs.POMODORO_DISPLAYS_SPACER[1])
         self.create_displays()
@@ -120,23 +133,27 @@ class PomodoroTimer:
     def update_gui(self):
         self.update_min_and_sec()
 
-        # only add to counter if the timer finishes (not when the user presses stop or restart)
+        # timer is finished
         if self.timer.get_min_value() <= 0 and self.timer.get_sec_value() <= 0:
             # only update counter if it was a focus session
-            if self.timer.isFocus:
+            if self.isFocus:
                 self.update_pomodoro_counters()
 
                 # update user data
                 self.update_data_file()
 
+            # change the sound here (block allows the program to continue w/o waiting for sound to finish)
+            playsound(configs.SOUND_PATH, block=False)
+
             self.create_finished_dialog()
 
-            # change the sound here (block allows the program to continue w/o waiting for sound to finish)
-            playsound(configs.SOUND_PATH)
-
             # display toast
+            if self.isFocus:
+                message = configs.TOAST_FOCUS_DONE_MSG
+            else:
+                message = configs.TOAST_BREAK_DONE_MSG
             threading.Thread(target=Tools.display_notif, daemon=True, args=(configs.TOAST_TITLE,
-                                                                            configs.TOAST_MESSAGE,
+                                                                            message,
                                                                             configs.TOAST_DURATION)).start()
 
             # pomodoro_timer gui waits for user to press a button or close dialog
@@ -169,7 +186,7 @@ class PomodoroTimer:
             self.dpg.set_value(configs.POMODORO_MIN_FIELD_ID, self.timer.get_min_value())
             self.dpg.set_value(configs.POMODORO_SEC_FIELD_ID, self.timer.get_sec_value())
 
-            # todo easy fix as the gui is behind timer by one second
+            # todo quick fix as the gui is behind timer by one second
             if self.timer.get_min_value() <= 0 and self.timer.get_sec_value() <= 0:
                 self.dpg.set_value(configs.POMODORO_SEC_FIELD_ID, 0)
                 break
@@ -238,9 +255,9 @@ class PomodoroTimer:
 
     # restarts the timer and the gui threads
     def restart_threads(self):
-        if self.timer.isFocus:
+        if self.isFocus:
             mins = self.settings.get_focus_time()
-        elif self.timer.isOnSmallBreak:
+        elif self.isOnSmallBreak:
             mins = self.settings.get_small_break()
         else:
             mins = self.settings.get_long_break()
@@ -282,24 +299,37 @@ class PomodoroTimer:
 
     def focus_callback(self):
         self.event.set()
+        self.update_img_indicator(True)
 
-        self.timer.isOnLongBreak = False
-        self.timer.isFocus = True
-        self.timer.isOnSmallBreak = False
+        self.isOnLongBreak = False
+        self.isFocus = True
+        self.isOnSmallBreak = False
 
     def smallbreak_callback(self):
         self.event.set()
+        self.update_img_indicator(False)
 
-        self.timer.isOnLongBreak = False
-        self.timer.isFocus = False
-        self.timer.isOnSmallBreak = True
+        self.isOnLongBreak = False
+        self.isFocus = False
+        self.isOnSmallBreak = True
+
 
     def longbreak_callback(self):
         self.event.set()
+        self.update_img_indicator(False)
 
-        self.timer.isOnLongBreak = True
-        self.timer.isFocus = False
-        self.timer.isOnSmallBreak = False
+        self.isOnLongBreak = True
+        self.isFocus = False
+        self.isOnSmallBreak = False
+
+    # updates the main img to indicate focus or break time
+    def update_img_indicator(self, is_focus):
+        if is_focus:
+            self.dpg.show_item(self.study_img)
+            self.dpg.hide_item(self.relax_img)
+        else:
+            self.dpg.hide_item(self.study_img)
+            self.dpg.show_item(self.relax_img)
 
     def pause_callback(self):
         # replaces pause button with resume button

@@ -55,6 +55,7 @@ BANNER_IMG_PATH = "resources/images/tomato-banner.png"
 SOUND_PATH = "resources/sounds/bell.mp3"
 STUDYING_IMAGE_PATH = "resources/images/studying.png"
 FINISHED_IMAGE_PATH = "resources/images/finished.png"
+RELAXING_IMAGE_PATH = "resources/images/relaxing.png"
 
 # user data
 USERDATA_FILEPATH = "user_data.json"
@@ -68,7 +69,8 @@ USERDATA_DATE = 'date'
 # main
 TOAST_ERROR_MSG = "Notifications work for win 10 only"
 TOAST_TITLE = "Pomodoro Timer"
-TOAST_MESSAGE = "Pomodoro Session Completed!"
+TOAST_FOCUS_DONE_MSG = "Pomodoro Session Completed!"
+TOAST_BREAK_DONE_MSG = "Break Completed"
 TOAST_DURATION = 5
 VIEWPORT_TITLE = "Nikko's Pomodoro Timer"
 DPG_FONT_SCALE = 1.25

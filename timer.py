@@ -15,11 +15,6 @@ class Timer:
         self.timer_stop = False
         self.timer_restart = False
 
-        # initially the timer will be set to focus
-        self.isFocus = True
-        self.isOnSmallBreak = False
-        self.isOnLongBreak = False
-
         self.timer_event = threading.Event()
         self.timer_thread = threading.Thread(target=self.start_timer, daemon=True)
         self.timer_thread.start()

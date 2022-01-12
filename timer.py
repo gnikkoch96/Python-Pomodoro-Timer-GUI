@@ -2,7 +2,7 @@ import threading
 import time
 
 
-# Description: handles the thread for updating timer values (which gets grabbed from the timer GUI)
+# desc: contains the countdown mechanism that will be used in the timer gui
 class Timer:
     def __init__(self, mins):
         self.mins = mins

@@ -1,5 +1,4 @@
 import json
-
 import dearpygui.dearpygui as dpg
 import configs
 from tools import Tools
@@ -7,6 +6,7 @@ from pomodoro_settings import PomodoroSettings
 from os.path import exists
 
 
+# sets up the dearpygui
 def create_windows():
     dpg.create_context()
     dpg.create_viewport(title=configs.VIEWPORT_TITLE,
@@ -21,15 +21,16 @@ def create_windows():
     # creating themes
     create_dpg_themes()
 
-    # start pomodoro settings window
+    # create default user_data.json if not existent
     if not exists(configs.USERDATA_FILEPATH):
         Tools.create_default_user_data()
 
-    # create reference to user data json file
+    # load json data
     user_data_file = open(configs.USERDATA_FILEPATH)
     user_data = json.load(user_data_file)
     user_data_file.close()
 
+    # load pomodoro settings window
     PomodoroSettings(dpg, user_data)
 
     dpg.show_viewport()
@@ -39,11 +40,11 @@ def create_windows():
 
 def create_dpg_fonts():
     with dpg.font_registry():
-        dpg.add_font(configs.DEFAULT_FONT_PATH, 20, tag=configs.DEFAULT_FONT_TAG)
-        dpg.add_font(configs.TIMER_FONT_PATH, 60, tag=configs.TIMER_FONT_TAG)
+        dpg.add_font(configs.DEFAULT_FONT_PATH, 20, tag=configs.DEFAULT_FONT_ID)
+        dpg.add_font(configs.TIMER_FONT_PATH, 60, tag=configs.TIMER_FONT_ID)
 
         # implement the default font
-        dpg.bind_font(configs.DEFAULT_FONT_TAG)
+        dpg.bind_font(configs.DEFAULT_FONT_ID)
 
 
 def create_dpg_themes():

@@ -5,9 +5,8 @@ from playsound import playsound
 from tools import Tools
 
 
-# Description: this class handles the display of the timer to the user (how much mins and secs are left)
+# desc: loads the timer gui
 class PomodoroTimer:
-
     def __init__(self, dpg, settings, user_data):
         self.dpg = dpg
         self.user_data = user_data
@@ -17,7 +16,7 @@ class PomodoroTimer:
         self.study_img = None
         self.relax_img = None
 
-        # initially the timer will be set to focus
+        # bool flags to tell what the current activity is
         self.isFocus = True
         self.isOnSmallBreak = False
         self.isOnLongBreak = False
@@ -32,13 +31,15 @@ class PomodoroTimer:
         # update json file
         Tools.update_user_data(self.user_data)
 
-        # creates the timer thread
+        # starts the timer.py thread
         self.timer = Timer(self.settings.get_focus_time())
 
         self.create_pomodoro_timer_gui_window()
 
         # threading and events
         self.event = threading.Event()
+
+        # starts the timer gui thread
         self.pomodoro_timer_thread = threading.Thread(target=self.update_gui, daemon=True)
         self.pomodoro_timer_thread.start()
 
@@ -46,7 +47,6 @@ class PomodoroTimer:
         with self.dpg.window(tag=configs.POMODORO_WINDOW_ID,
                              height=self.dpg.get_viewport_height(),
                              width=self.dpg.get_viewport_width()) as timer_window:
-            # todo cleanup
             self.dpg.bind_item_theme(timer_window, configs.DEFAULT_THEME_ID)
             self.dpg.set_primary_window(timer_window, True)
             self.create_pomodoro_timer_gui_items()
@@ -61,17 +61,21 @@ class PomodoroTimer:
         with self.dpg.group(horizontal=True) as self.relax_img:
             self.dpg.add_spacer(width=configs.POMODORO_STUDY_IMG_SPACER[0])
             Tools.add_and_load_image(self.dpg, configs.RELAXING_IMAGE_PATH, self.relax_img)
+
+        # hidden in the beginning and only appears when user is on a small/long break
         self.dpg.hide_item(self.relax_img)
 
+        # load min, sec, and pomodoro displays
         self.dpg.add_spacer(height=configs.POMODORO_DISPLAYS_SPACER[1])
         self.create_displays()
 
+        # load the timer buttons
         self.dpg.add_spacer(height=configs.POMODORO_BUTTONS_SPACER[1])
         self.create_buttons()
 
         # binds fonts to timer
-        self.dpg.bind_item_font(configs.POMODORO_MIN_FIELD_ID, configs.TIMER_FONT_TAG)
-        self.dpg.bind_item_font(configs.POMODORO_SEC_FIELD_ID, configs.TIMER_FONT_TAG)
+        self.dpg.bind_item_font(configs.POMODORO_MIN_FIELD_ID, configs.TIMER_FONT_ID)
+        self.dpg.bind_item_font(configs.POMODORO_SEC_FIELD_ID, configs.TIMER_FONT_ID)
 
     def create_displays(self):
         with self.dpg.group(horizontal=True):
@@ -127,9 +131,9 @@ class PomodoroTimer:
                                 tag=configs.POMODORO_RESUME_BTN_ID,
                                 callback=self.resume_callback)
 
+            # resume appears only when pause is pressed
             self.dpg.hide_item(configs.POMODORO_RESUME_BTN_ID)
 
-    # this is a thread function used to update the gui with the timer min and sec values
     def update_gui(self):
         self.update_min_and_sec()
 
@@ -152,9 +156,9 @@ class PomodoroTimer:
                 message = configs.TOAST_FOCUS_DONE_MSG
             else:
                 message = configs.TOAST_BREAK_DONE_MSG
-            threading.Thread(target=Tools.display_notif, daemon=True, args=(configs.TOAST_TITLE,
-                                                                            message,
-                                                                            configs.TOAST_DURATION)).start()
+            threading.Thread(target=Tools.display_win10_notif, daemon=True, args=(configs.TOAST_TITLE,
+                                                                                  message,
+                                                                                  configs.TOAST_DURATION)).start()
 
             # pomodoro_timer gui waits for user to press a button or close dialog
             self.event.wait()
@@ -194,9 +198,7 @@ class PomodoroTimer:
         # waits for values to be set before deleting window (to prevent updating errors)
         if self.timer.timer_stop:
             self.dpg.delete_item(configs.POMODORO_WINDOW_ID)
-
-            # todo this is currently a workaround and could be fixed in the next update
-            self.remove_aliases()
+            self.cleanup_pomodoro_win_aliases()
 
     def update_data_file(self):
         # update the values
@@ -206,7 +208,7 @@ class PomodoroTimer:
         # update json file
         Tools.update_user_data(self.user_data)
 
-    def remove_aliases(self):
+    def cleanup_pomodoro_win_aliases(self):
         # displays
         if self.dpg.does_alias_exist(configs.POMODORO_MIN_FIELD_ID):
             self.dpg.remove_alias(configs.POMODORO_MIN_FIELD_ID)
@@ -244,6 +246,7 @@ class PomodoroTimer:
             self.dpg.remove_alias(configs.POMODORO_LONG_BREAK_BTN_ID)
 
     def update_pomodoro_counters(self):
+        # increment pomodoro counter
         pomodoro_counter = int(self.dpg.get_value(configs.POMODORO_COUNTER_FIELD_ID)) + 1
         self.local_pomodoro_counter = pomodoro_counter
 
@@ -251,6 +254,7 @@ class PomodoroTimer:
         self.user_data[configs.USERDATA_DATE][Tools.get_current_day()] = self.local_pomodoro_counter
         Tools.update_user_data(self.user_data)
 
+        # update the pomodoro field display
         self.dpg.set_value(configs.POMODORO_COUNTER_FIELD_ID, str(pomodoro_counter))
 
     # restarts the timer and the gui threads
@@ -312,7 +316,6 @@ class PomodoroTimer:
         self.isOnLongBreak = False
         self.isFocus = False
         self.isOnSmallBreak = True
-
 
     def longbreak_callback(self):
         self.event.set()

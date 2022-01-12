@@ -57,7 +57,7 @@ class Tools:
         return time_list
 
     @staticmethod
-    def display_notif(title, message, dur):
+    def display_win10_notif(title, message, dur):
         toast = ToastNotifier()
 
         # display toast notification showing that timer is done (win 10 only)

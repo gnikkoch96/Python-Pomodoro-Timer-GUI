@@ -62,6 +62,6 @@ class Tools:
 
         # display toast notification showing that timer is done (win 10 only)
         try:
-            toast.show_toast(title, message, duration=dur)
+            toast.show_toast(title, message, icon_path=configs.ICON_PATH, duration=dur)
         except:
             print(configs.TOAST_ERROR_MSG)

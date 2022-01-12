@@ -47,6 +47,7 @@ SOUND_PATH = "resources/sounds/bell.mp3"
 STUDYING_IMAGE_PATH = "resources/images/studying.png"
 FINISHED_IMAGE_PATH = "resources/images/finished.png"
 RELAXING_IMAGE_PATH = "resources/images/relaxing.png"
+ICON_PATH = "resources/images/tomato.ico"
 
 # user data
 USERDATA_FILEPATH = "user_data.json"

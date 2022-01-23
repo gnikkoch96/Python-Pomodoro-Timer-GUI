@@ -5,7 +5,8 @@
 <h2> Description </h2>
   <!--Describe the project (what is a pomodoro timer?)-->
   <p> Pomodoro Timer GUI emulates the Pomodoro Technique which is a time management method that breaks work into intervals separated by short or long breaks.</p>
-       
+  
+
 <!--Technologies and Frameworks Used-->
 <h2> Technologies and Frameworks Used </h2>
   <p> Make sure to install the DearPyGUI and Playsound Modules for it to work. You can follow the installation to DearPyGUI <a href="https://github.com/hoffstadt/DearPyGui"> here </a> and Playsound <a href="https://pypi.org/project/playsound/"> here </a>.</p> 
@@ -19,8 +20,7 @@
 
 <!--Demonstration + How to Use-->
 <h2> Demonstration & How to Use </h2>
-  <p> You can now just run the Pomodoro Timer.exe from the dist folder </p>
-  
+  <p> <b>Note: </b> You can run the software through the .exe file located in the dist folder </p>
   <!--Configuring the settings-->
   <h3> Configuring the Settings </h3>
     <p> Configured settings will be stored on local json file after starting the session </p>
